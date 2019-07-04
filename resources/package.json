@@ -23,6 +23,7 @@
     "build": "webpack --mode production --watch"
   },
   "dependencies": {
-    "js-cookie": "^2.2.0"
+    "js-cookie": "^2.2.0",
+    "velocity-animate": "^1.5.2"
   }
 }
