@@ -157,6 +157,34 @@ export default class {
   }
 
   /**
+   * 最後のスライドから最初のスライドへ
+   */
+  fromLastToFirst() {
+    this.previousCounter = this.numberOfImages;
+    //最後の位置に複製した画像１へ送る
+    this.sliderCounter++;
+    this.moveSlide();
+    //最後の場所から本来の1番目の場所へジャンプ
+    this.sliderCounter = 1;
+    this.changeActiveIndicator();
+    this.jumpSlide(this.calcSliderPosition(this.sliderCounter), false);
+  }
+
+  /**
+   * 最初のスライドから最後のスライドへ
+   */
+  fromFirstToLast() {
+    //最初の位置に複製した最終画像へ送る
+    this.previousCounter = 1;
+    this.sliderCounter--;
+    this.moveSlide();
+    //本来の場所へジャンプ
+    this.sliderCounter = this.numberOfImages;
+    this.changeActiveIndicator();
+    this.jumpSlide(this.calcSliderPosition(this.sliderCounter), false);
+  }
+
+  /**
    * インジケーターの表示切り替え
    */
   changeActiveIndicator() {
@@ -203,10 +231,10 @@ export default class {
     //スワイプ距離計算[px]
     const DISTANCE = this.fingerPosition.current - this.fingerPosition.previous;
     //スワイプ距離変換[vw]
-    this.DISTANCE_VW = (DISTANCE * 100) / window.innerWidth;
+    this.distanceVW = (DISTANCE * 100) / window.innerWidth;
     //移動量計算
     this.moveTo =
-      -(this.sliderCounter * this.sliderSize) + this.DISTANCE_VW + 'vw';
+      -(this.sliderCounter * this.sliderSize) + this.distanceVW + 'vw';
 
     this.jumpSlide(this.moveTo, false);
 
@@ -220,36 +248,14 @@ export default class {
    */
   judge() {
     //スワイプ距離が半分超えたら次のスライドへ
-    if (this.DISTANCE_VW < -(this.sliderSize / 2)) {
-      //最後のスライドから最初へ飛ぶ場合
-      if (this.sliderCounter === this.numberOfImages) {
-        this.previousCounter = this.numberOfImages;
-        //最後の位置に複製した画像１へ送る
-        this.sliderCounter++;
-        this.moveSlide();
-        //最後の場所から本来の1番目の場所へジャンプ
-        this.sliderCounter = 1;
-        this.changeActiveIndicator();
-        this.jumpSlide(this.calcSliderPosition(this.sliderCounter), false);
-        //通常通りの移動
-      } else {
-        this.nextData();
-      }
-    } else if (this.DISTANCE_VW > this.sliderSize / 2) {
-      //最初のスライドから最後へ飛ぶ場合
-      if (this.sliderCounter === 1) {
-        //最初の位置に複製した最終画像へ送る
-        this.previousCounter = 1;
-        this.sliderCounter--;
-        this.moveSlide();
-        //本来の場所へジャンプ
-        this.sliderCounter = this.numberOfImages;
-        this.changeActiveIndicator();
-        this.jumpSlide(this.calcSliderPosition(this.sliderCounter), false);
-        //通常通りの移動
-      } else {
-        this.previousData();
-      }
+    if (this.distanceVW < -(this.sliderSize / 2)) {
+      //最後のスライドから移動するかどうかで通常処理と分岐
+      this.sliderCounter === this.numberOfImages
+        ? this.fromLastToFirst()
+        : this.nextData();
+    } else if (this.distanceVW > this.sliderSize / 2) {
+      //最初のスライドから移動するかどうかで通常処理と分岐
+      this.sliderCounter === 1 ? this.fromFirstToLast() : this.previousData();
     } else {
       //画像移動ない場合は元に戻す
       this.moveSlide();
