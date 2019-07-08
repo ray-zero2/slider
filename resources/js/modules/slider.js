@@ -177,9 +177,9 @@ export default class {
     });
 
     this.$sliderWindow.addEventListener('touchstart', () => {
-      let touchObject = event.changedTouches[0];
-      this.fingerPosition.previous = touchObject.pageX;
-      this.fingerPosition.current = touchObject.pageX;
+      const TOUCH_OBJECT = event.changedTouches[0];
+      this.fingerPosition.previous = TOUCH_OBJECT.pageX;
+      this.fingerPosition.current = TOUCH_OBJECT.pageX;
       //指に追従させる
       this.isFinger = true;
       this.trackingFinger();
@@ -255,11 +255,11 @@ export default class {
    */
   initialize() {
     //最初と最後の画像を複製してリストに追加
-    let $firstImage = this.$slider_list.firstElementChild.cloneNode(true);
-    let $lastImage = this.$slider_list.lastElementChild.cloneNode(true);
-    this.$slider_list.appendChild($firstImage);
+    const $FIRST_IMAGE = this.$slider_list.firstElementChild.cloneNode(true);
+    const $LAST_IMAGE = this.$slider_list.lastElementChild.cloneNode(true);
+    this.$slider_list.appendChild($FIRST_IMAGE);
     this.$slider_list.insertBefore(
-      $lastImage,
+      $LAST_IMAGE,
       this.$slider_list.firstElementChild
     );
 
@@ -267,10 +267,10 @@ export default class {
     this.createIndicator();
 
     //スライダー初期位置に移動
-    let sliderFirstPosition = this.calcSliderPosition(this.sliderCounter);
+    const SLIDER_FIRST_POSITION = this.calcSliderPosition(this.sliderCounter);
     velocity(
       this.$slider_list,
-      { translateX: sliderFirstPosition },
+      { translateX: SLIDER_FIRST_POSITION },
       { duration: 0 }
     );
   }
