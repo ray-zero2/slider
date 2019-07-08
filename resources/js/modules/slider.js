@@ -35,8 +35,29 @@ export default class {
     this.bind();
   }
 
-  calcSliderPosition(number) {
-    return -(number * this.sliderSize) + 'vw';
+  /**
+   * 初期準備
+   */
+  initialize() {
+    //最初と最後の画像を複製してリストに追加
+    let $firstImage = this.$slider_list.firstElementChild.cloneNode(true);
+    let $lastImage = this.$slider_list.lastElementChild.cloneNode(true);
+    this.$slider_list.appendChild($firstImage);
+    this.$slider_list.insertBefore(
+      $lastImage,
+      this.$slider_list.firstElementChild
+    );
+
+    //インジケータ作成
+    this.createIndicator();
+
+    //スライダー初期位置に移動
+    let sliderFirstPosition = this.calcSliderPosition(this.sliderCounter);
+    velocity(
+      this.$slider_list,
+      { translateX: sliderFirstPosition },
+      { duration: 0 }
+    );
   }
 
   /**
@@ -55,114 +76,23 @@ export default class {
   }
 
   /**
-   * インジケーターの表示切り替え
+   * スライダーの位置を返す
+   * @param {Number} number - 何番目のスライドか
    */
-  changeActiveIndicator() {
-    [...this.$DOT_ITEMS][this.previousCounter].classList.remove(
-      'current-image-dot'
-    );
-    [...this.$DOT_ITEMS][this.sliderCounter].classList.add('current-image-dot');
+  calcSliderPosition(number) {
+    return -(number * this.sliderSize) + 'vw';
   }
 
   /**
-   * slider移動
+   * イベント設定
    */
-  moveSlide() {
-    const POSITION = this.calcSliderPosition(this.sliderCounter);
-    velocity(
-      this.$slider_list,
-      { translateX: POSITION },
-      {
-        duration: this.duration
-      }
-    );
-  }
-  /**
-   * slider移動(0秒)
-   */
-  jumpSlide(number) {
-    const POSITION = this.calcSliderPosition(number);
-    velocity(
-      this.$slider_list,
-      { translateX: POSITION },
-      {
-        duration: 0
-      }
-    );
-  }
-
-  nextData() {
-    this.previousCounter = this.sliderCounter;
-    this.sliderCounter++;
-
-    if (this.sliderCounter > this.numberOfImages) {
-      this.sliderCounter = 1;
-      velocity(
-        this.$slider_list,
-        { translateX: 0 },
-        {
-          duration: 0,
-          complete: () => {
-            this.changeActiveIndicator();
-            this.moveSlide();
-          }
-        }
-      );
-    } else {
-      this.changeActiveIndicator();
-      this.moveSlide();
-    }
-  }
-
-  previousData() {
-    this.previousCounter = this.sliderCounter;
-    this.sliderCounter--;
-    if (this.sliderCounter < 1) {
-      this.sliderCounter = this.numberOfImages;
-      velocity(
-        this.$slider_list,
-        { translateX: this.calcSliderPosition(this.sliderCounter + 1) },
-        {
-          duration: 0,
-          complete: () => {
-            this.changeActiveIndicator();
-            this.moveSlide();
-          }
-        }
-      );
-    } else {
-      this.changeActiveIndicator();
-      this.moveSlide();
-    }
-  }
-
-  trackingFinger() {
-    if (!this.isFinger) return;
-
-    //スワイプ距離計算[px]
-    const DISTANCE = this.fingerPosition.current - this.fingerPosition.previous;
-    //スワイプ距離変換[vw]
-    this.DISTANCE_VW = (DISTANCE * 100) / window.innerWidth;
-    //移動量計算
-    this.moveTo =
-      -(this.sliderCounter * this.sliderSize) + this.DISTANCE_VW + 'vw';
-
-    velocity(this.$slider_list, { translateX: this.moveTo }, { duration: 0 });
-
-    setTimeout(() => {
-      this.trackingFinger();
-    }, this.frameTime);
-  }
-
   bind() {
     [...this.$sliderButton].forEach(element => {
-      element.addEventListener('click', event => {
+      element.addEventListener('click', () => {
         velocity(this.$slider_list, 'stop', true);
-        if (element.dataset.order === 'after') {
-          this.nextData();
-        } else {
-          this.previousData();
-        }
+        element.dataset.order === 'after'
+          ? this.nextData()
+          : this.previousData();
       });
     });
 
@@ -201,6 +131,106 @@ export default class {
       this.fingerPosition.current = 0;
     });
   }
+
+  /**
+   * 次のスライドへ
+   */
+  nextData() {
+    this.previousCounter = this.sliderCounter;
+    this.sliderCounter++;
+
+    if (this.sliderCounter > this.numberOfImages) {
+      this.sliderCounter = 1;
+      velocity(
+        this.$slider_list,
+        { translateX: 0 },
+        {
+          duration: 0,
+          complete: () => {
+            this.changeActiveIndicator();
+            this.moveSlide();
+          }
+        }
+      );
+    } else {
+      this.changeActiveIndicator();
+      this.moveSlide();
+    }
+  }
+
+  /**
+   * 前のスライドへ
+   */
+  previousData() {
+    this.previousCounter = this.sliderCounter;
+    this.sliderCounter--;
+    if (this.sliderCounter < 1) {
+      this.sliderCounter = this.numberOfImages;
+      velocity(
+        this.$slider_list,
+        { translateX: this.calcSliderPosition(this.sliderCounter + 1) },
+        {
+          duration: 0,
+          complete: () => {
+            this.changeActiveIndicator();
+            this.moveSlide();
+          }
+        }
+      );
+    } else {
+      this.changeActiveIndicator();
+      this.moveSlide();
+    }
+  }
+
+  /**
+   * インジケーターの表示切り替え
+   */
+  changeActiveIndicator() {
+    [...this.$DOT_ITEMS][this.previousCounter].classList.remove(
+      'current-image-dot'
+    );
+    [...this.$DOT_ITEMS][this.sliderCounter].classList.add('current-image-dot');
+  }
+
+  /**
+   * slider移動
+   */
+  moveSlide() {
+    const POSITION = this.calcSliderPosition(this.sliderCounter);
+    velocity(
+      this.$slider_list,
+      { translateX: POSITION },
+      {
+        duration: this.duration
+      }
+    );
+  }
+
+  /**
+   * 指に追従させる
+   */
+  trackingFinger() {
+    if (!this.isFinger) return;
+
+    //スワイプ距離計算[px]
+    const DISTANCE = this.fingerPosition.current - this.fingerPosition.previous;
+    //スワイプ距離変換[vw]
+    this.DISTANCE_VW = (DISTANCE * 100) / window.innerWidth;
+    //移動量計算
+    this.moveTo =
+      -(this.sliderCounter * this.sliderSize) + this.DISTANCE_VW + 'vw';
+
+    velocity(this.$slider_list, { translateX: this.moveTo }, { duration: 0 });
+
+    setTimeout(() => {
+      this.trackingFinger();
+    }, this.frameTime);
+  }
+
+  /**
+   * スライドをどう動かすかの判定
+   */
   render() {
     //スワイプ距離が半分超えたら次のスライドへ
     if (this.DISTANCE_VW < -(this.sliderSize / 2)) {
@@ -249,29 +279,5 @@ export default class {
       //画像移動ない場合は元に戻す
       this.moveSlide();
     }
-  }
-  /**
-   * 初期準備
-   */
-  initialize() {
-    //最初と最後の画像を複製してリストに追加
-    let $firstImage = this.$slider_list.firstElementChild.cloneNode(true);
-    let $lastImage = this.$slider_list.lastElementChild.cloneNode(true);
-    this.$slider_list.appendChild($firstImage);
-    this.$slider_list.insertBefore(
-      $lastImage,
-      this.$slider_list.firstElementChild
-    );
-
-    //インジケータ作成
-    this.createIndicator();
-
-    //スライダー初期位置に移動
-    let sliderFirstPosition = this.calcSliderPosition(this.sliderCounter);
-    velocity(
-      this.$slider_list,
-      { translateX: sliderFirstPosition },
-      { duration: 0 }
-    );
   }
 }
