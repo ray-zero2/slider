@@ -33,6 +33,16 @@ export default class {
     //最初に何枚目を表示するか、初期値
     velocity(this.$slider_list, { translateX: '-70vw' }, { duration: 0 });
 
+    //タッチしたときの動きに関する部分
+    this.isFinger = false;
+    this.fingerPosition = {
+      previous: 0,
+      current: 0
+    };
+
+    this.fps = 30;
+    this.frameTime = 1000 / this.fps;
+
     this.bind();
   }
   createIndicator() {
@@ -40,7 +50,7 @@ export default class {
     for (let i = 1; i <= this.numberOfImages; i++) {
       let $item = document.createElement('li');
       $item.dataset.number = i;
-      if (i === this.sliderCounter) $item.classList.add('current-image-dot');
+      if (i === 1) $item.classList.add('current-image-dot');
       dotFragment.appendChild($item);
     }
     this.$indicator.appendChild(dotFragment);
@@ -54,10 +64,7 @@ export default class {
   }
 
   render() {
-    this.changeActiveIndicator();
     const POSITION = -(this.sliderCounter * this.sliderSize) + 'vw';
-    // console.log(`move to ${POSITION}`);
-
     velocity(
       this.$slider_list,
       { translateX: POSITION },
@@ -74,6 +81,7 @@ export default class {
   }
 
   nextData() {
+    this.previousCounter = this.sliderCounter;
     this.sliderCounter++;
     if (this.sliderCounter > this.numberOfImages) {
       this.sliderCounter = 1;
@@ -87,15 +95,18 @@ export default class {
           },
           complete: () => {
             console.log(`jump complete : ${this.sliderCounter}`);
+            this.changeActiveIndicator();
             this.render();
           }
         }
       );
     } else {
+      this.changeActiveIndicator();
       this.render();
     }
   }
   previousData() {
+    this.previousCounter = this.sliderCounter;
     this.sliderCounter--;
     if (this.sliderCounter < 1) {
       // velocity(this.$slider_list, 'stop', true);
@@ -110,11 +121,13 @@ export default class {
           },
           complete: () => {
             console.log(`jump complete : ${this.sliderCounter}`);
+            this.changeActiveIndicator();
             this.render();
           }
         }
       );
     } else {
+      this.changeActiveIndicator();
       this.render();
     }
   }
@@ -124,7 +137,7 @@ export default class {
       element.addEventListener('click', event => {
         velocity(this.$slider_list, 'stop', true);
         // velocity(this.$slider_list, 'finish', true);
-        this.previousCounter = this.sliderCounter;
+
         if (element.dataset.order === 'after') {
           this.nextData();
         } else {
@@ -138,8 +151,101 @@ export default class {
         const SELECT_NUMBER = event.target.dataset.number;
         this.previousCounter = this.sliderCounter;
         this.sliderCounter = SELECT_NUMBER;
+        this.changeActiveIndicator();
         this.render();
       });
     });
+
+    this.$sliderWindow.addEventListener('touchstart', () => {
+      console.log('touchstart');
+
+      let touchObject = event.changedTouches[0];
+      this.isFinger = true;
+      this.fingerPosition.previous = touchObject.pageX;
+      this.fingerPosition.current = touchObject.pageX;
+      this.sliderPosition = -(this.sliderCounter * this.sliderSize);
+      this.trackingFinger();
+    });
+
+    this.$sliderWindow.addEventListener('touchmove', () => {
+      console.log('touchmove');
+      let touchObject = event.changedTouches[0];
+      this.fingerPosition.current = touchObject.pageX;
+    });
+
+    this.$sliderWindow.addEventListener('touchend', () => {
+      console.log('touchend');
+      this.isFinger = false;
+
+      if (this.DISTANCE_VW < -(this.sliderSize / 2)) {
+        if (this.sliderCounter === this.numberOfImages) {
+          this.previousCounter = this.sliderCounter;
+          this.sliderCounter++;
+          this.render();
+          this.sliderCounter = 1;
+          this.changeActiveIndicator();
+          velocity(
+            this.$slider_list,
+            { translateX: '-70vw' },
+            {
+              duration: 0
+            }
+          );
+        } else {
+          this.nextData();
+        }
+      } else if (this.DISTANCE_VW > this.sliderSize / 2) {
+        if (this.sliderCounter === 1) {
+          this.previousCounter = this.sliderCounter;
+          this.sliderCounter--;
+          this.render();
+          this.sliderCounter = this.numberOfImages;
+          this.changeActiveIndicator();
+          velocity(
+            this.$slider_list,
+            { translateX: '-350vw' },
+            {
+              duration: 0
+            }
+          );
+        } else {
+          this.previousData();
+        }
+      } else {
+        this.render();
+      }
+      this.fingerPosition.previous = 0;
+      this.fingerPosition.current = 0;
+    });
+  }
+  trackingFinger() {
+    if (!this.isFinger) return;
+
+    const DISTANCE = this.fingerPosition.current - this.fingerPosition.previous;
+    this.DISTANCE_VW = (DISTANCE * 100) / window.innerWidth;
+    this.moveTo = this.sliderPosition + this.DISTANCE_VW + 'vw';
+    console.log(`distance ${this.DISTANCE_VW}`);
+    console.log(`move to ${this.moveTo}`);
+    velocity(this.$slider_list, { translateX: this.moveTo }, { duration: 0 });
+
+    // this.$slider_list.style.transform = 'translateX(this.moveTo)';
+    //スライダーカウンタいじる
+    setTimeout(() => {
+      this.trackingFinger();
+    }, this.frameTime);
+  }
+
+  renderFinger() {
+    if (this.DISTANCE_VW <= -(this.sliderSize / 2)) {
+      this.nextData();
+    } else if (this.DISTANCE_VW >= this.sliderSize / 2) {
+      this.previousData();
+    } else {
+      velocity(
+        this.$slider_list,
+        { translateX: this.sliderPosition },
+        { duration: this.duration }
+      );
+    }
   }
 }
