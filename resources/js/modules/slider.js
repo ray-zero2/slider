@@ -51,11 +51,8 @@ export default class {
 
     //スライダー初期位置に移動
     let sliderFirstPosition = this.calcSliderPosition(this.sliderCounter);
-    velocity(
-      this.$slider_list,
-      { translateX: sliderFirstPosition },
-      { duration: 0 }
-    );
+
+    this.jumpSlide(sliderFirstPosition, false);
   }
 
   /**
@@ -139,21 +136,10 @@ export default class {
 
     if (this.sliderCounter > this.numberOfImages) {
       this.sliderCounter = 1;
-      velocity(
-        this.$slider_list,
-        { translateX: 0 },
-        {
-          duration: 0,
-          complete: () => {
-            this.changeActiveIndicator();
-            this.moveSlide();
-          }
-        }
-      );
-    } else {
-      this.changeActiveIndicator();
-      this.moveSlide();
+      this.jumpSlide(0, true);
     }
+    this.changeActiveIndicator();
+    this.moveSlide();
   }
 
   /**
@@ -164,21 +150,10 @@ export default class {
     this.sliderCounter--;
     if (this.sliderCounter < 1) {
       this.sliderCounter = this.numberOfImages;
-      velocity(
-        this.$slider_list,
-        { translateX: this.calcSliderPosition(this.sliderCounter + 1) },
-        {
-          duration: 0,
-          complete: () => {
-            this.changeActiveIndicator();
-            this.moveSlide();
-          }
-        }
-      );
-    } else {
-      this.changeActiveIndicator();
-      this.moveSlide();
+      this.jumpSlide(this.calcSliderPosition(this.sliderCounter + 1), true);
     }
+    this.changeActiveIndicator();
+    this.moveSlide();
   }
 
   /**
@@ -200,9 +175,23 @@ export default class {
       this.$slider_list,
       { translateX: POSITION },
       {
-        duration: this.duration
+        duration: this.duration,
+        queue: 'move'
       }
     );
+
+    velocity.Utilities.dequeue(this.$slider_list, 'move');
+  }
+
+  /**
+   * slider移動(0秒)
+   * @param {String} value - 移動先の位置
+   * @param {Boolean} isEnqueue - キューに追加するかどうか
+   */
+  jumpSlide(value, isEnqueue) {
+    let options = { duration: 0 };
+    if (isEnqueue) options.queue = 'move';
+    velocity(this.$slider_list, { translateX: value }, options);
   }
 
   /**
@@ -219,7 +208,7 @@ export default class {
     this.moveTo =
       -(this.sliderCounter * this.sliderSize) + this.DISTANCE_VW + 'vw';
 
-    velocity(this.$slider_list, { translateX: this.moveTo }, { duration: 0 });
+    this.jumpSlide(this.moveTo, false);
 
     setTimeout(() => {
       this.trackingFinger();
@@ -241,13 +230,7 @@ export default class {
         //最後の場所から本来の1番目の場所へジャンプ
         this.sliderCounter = 1;
         this.changeActiveIndicator();
-        velocity(
-          this.$slider_list,
-          { translateX: this.calcSliderPosition(this.sliderCounter) },
-          {
-            duration: 0
-          }
-        );
+        this.jumpSlide(this.calcSliderPosition(this.sliderCounter), false);
         //通常通りの移動
       } else {
         this.nextData();
@@ -262,13 +245,7 @@ export default class {
         //本来の場所へジャンプ
         this.sliderCounter = this.numberOfImages;
         this.changeActiveIndicator();
-        velocity(
-          this.$slider_list,
-          { translateX: this.calcSliderPosition(this.sliderCounter) },
-          {
-            duration: 0
-          }
-        );
+        this.jumpSlide(this.calcSliderPosition(this.sliderCounter), false);
         //通常通りの移動
       } else {
         this.previousData();
