@@ -1,11 +1,9 @@
 // import velocity from 'velocity-animate';
 export default class {
   constructor() {
-    this.$sliderButton = document.querySelectorAll('.slider_btn');
+    this.$sliderButtons = document.querySelectorAll('.slider_btn');
     this.$sliderWindow = document.querySelector('.slider_window');
     this.$slider_list = document.querySelector('.slider_list');
-    this.$image1 = document.querySelector('.slider_image1');
-    this.$image5 = document.querySelector('.slider_image5');
     this.$indicator = document.querySelector('.indicator');
 
     //指スワイプで反応するレート
@@ -29,7 +27,7 @@ export default class {
     this.frameTime = 1000 / this.fps;
     //初期化
     this.initialize();
-    this.$DOT_ITEMS = this.$indicator.childNodes;
+    this.$dotItems = this.$indicator.childNodes;
 
     //イベント生成
     this.bind();
@@ -87,7 +85,7 @@ export default class {
    * イベント設定
    */
   bind() {
-    [...this.$sliderButton].forEach(element => {
+    [...this.$sliderButtons].forEach(element => {
       element.addEventListener('click', () => {
         velocity(this.$slider_list, 'stop', true);
         element.dataset.order === 'after'
@@ -96,7 +94,7 @@ export default class {
       });
     });
 
-    [...this.$DOT_ITEMS].forEach($element => {
+    [...this.$dotItems].forEach($element => {
       $element.addEventListener('click', event => {
         const SELECT_NUMBER = event.target.dataset.number;
         this.previousCounter = this.sliderCounter;
@@ -187,10 +185,10 @@ export default class {
    * インジケーターの表示切り替え
    */
   changeActiveIndicator() {
-    [...this.$DOT_ITEMS][this.previousCounter].classList.remove(
+    [...this.$dotItems][this.previousCounter].classList.remove(
       'current-image-dot'
     );
-    [...this.$DOT_ITEMS][this.sliderCounter].classList.add('current-image-dot');
+    [...this.$dotItems][this.sliderCounter].classList.add('current-image-dot');
   }
 
   /**
