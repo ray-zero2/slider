@@ -85,10 +85,10 @@ export default class {
    * イベント設定
    */
   bind() {
-    [...this.$sliderButtons].forEach(element => {
-      element.addEventListener('click', () => {
+    [...this.$sliderButtons].forEach($element => {
+      $element.addEventListener('click', () => {
         velocity(this.$slider_list, 'stop', true);
-        element.dataset.order === 'after'
+        $element.dataset.order === 'after'
           ? this.nextData()
           : this.previousData();
       });
