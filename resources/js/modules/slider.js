@@ -8,6 +8,26 @@ export default class {
     this.$image5 = document.querySelector('.slider_image5');
     this.$indicator = document.querySelector('.indicator');
 
+    //指スワイプで反応するレート
+    this.fps = 30;
+    //スライダー画像サイズ[vw]
+    this.sliderSize = 70;
+    //アニメーション動作時間[ms]
+    this.duration = 200;
+    //スライダー画像表示番号
+    this.sliderCounter = 1;
+    this.previousCounter = this.sliderCounter;
+
+    //現在の画像枚数取得
+    this.numberOfImages = this.$slider_list.childElementCount;
+    //タッチしたときの動きに関する部分
+    this.isFinger = false;
+    this.fingerPosition = {
+      previous: 0,
+      current: 0
+    };
+    this.frameTime = 1000 / this.fps;
+
     this.initialize();
     this.$DOT_ITEMS = this.$indicator.childNodes;
 
@@ -216,19 +236,6 @@ export default class {
    * 初期準備
    */
   initialize() {
-    //指スワイプで反応するレート
-    this.fps = 30;
-    //スライダー画像サイズ[vw]
-    this.sliderSize = 70;
-    //アニメーション動作時間[ms]
-    this.duration = 200;
-    //スライダー画像表示番号
-    this.sliderCounter = 1;
-    this.previousCounter = this.sliderCounter;
-
-    //現在の画像枚数取得
-    this.numberOfImages = this.$slider_list.childElementCount;
-
     //最初と最後の画像を複製してリストに追加
     let $firstImage = this.$slider_list.firstElementChild.cloneNode(true);
     let $lastImage = this.$slider_list.lastElementChild.cloneNode(true);
@@ -248,13 +255,5 @@ export default class {
       { translateX: sliderFirstPosition },
       { duration: 0 }
     );
-
-    //タッチしたときの動きに関する部分
-    this.isFinger = false;
-    this.fingerPosition = {
-      previous: 0,
-      current: 0
-    };
-    this.frameTime = 1000 / this.fps;
   }
 }
