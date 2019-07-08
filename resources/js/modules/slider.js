@@ -27,18 +27,21 @@ export default class {
       current: 0
     };
     this.frameTime = 1000 / this.fps;
-
+    //初期化
     this.initialize();
     this.$DOT_ITEMS = this.$indicator.childNodes;
 
+    //イベント生成
     this.bind();
   }
+
   calcSliderPosition(number) {
     return -(number * this.sliderSize) + 'vw';
   }
 
   /**
    * インジケーターの要素を作成してDOMに追加する
+   * 一度フラグメントに入れてまとめてDOMへ。
    */
   createIndicator() {
     let dotFragment = document.createDocumentFragment();
@@ -61,19 +64,29 @@ export default class {
     [...this.$DOT_ITEMS][this.sliderCounter].classList.add('current-image-dot');
   }
 
-  render() {
-    const POSITION = -(this.sliderCounter * this.sliderSize) + 'vw';
+  /**
+   * slider移動
+   */
+  moveSlide() {
+    const POSITION = this.calcSliderPosition(this.sliderCounter);
     velocity(
       this.$slider_list,
       { translateX: POSITION },
       {
-        duration: this.duration,
-        begin: () => {
-          // console.log(`move begin : ${this.sliderCounter}`);
-        },
-        complete: () => {
-          // console.log(`move complete : ${this.sliderCounter}`);
-        }
+        duration: this.duration
+      }
+    );
+  }
+  /**
+   * slider移動(0秒)
+   */
+  jumpSlide(number) {
+    const POSITION = this.calcSliderPosition(number);
+    velocity(
+      this.$slider_list,
+      { translateX: POSITION },
+      {
+        duration: 0
       }
     );
   }
@@ -81,6 +94,7 @@ export default class {
   nextData() {
     this.previousCounter = this.sliderCounter;
     this.sliderCounter++;
+
     if (this.sliderCounter > this.numberOfImages) {
       this.sliderCounter = 1;
       velocity(
@@ -88,19 +102,15 @@ export default class {
         { translateX: 0 },
         {
           duration: 0,
-          begin: () => {
-            console.log(`jump begin : ${this.sliderCounter}`);
-          },
           complete: () => {
-            console.log(`jump complete : ${this.sliderCounter}`);
             this.changeActiveIndicator();
-            this.render();
+            this.moveSlide();
           }
         }
       );
     } else {
       this.changeActiveIndicator();
-      this.render();
+      this.moveSlide();
     }
   }
 
@@ -108,37 +118,35 @@ export default class {
     this.previousCounter = this.sliderCounter;
     this.sliderCounter--;
     if (this.sliderCounter < 1) {
-      // velocity(this.$slider_list, 'stop', true);
       this.sliderCounter = this.numberOfImages;
       velocity(
         this.$slider_list,
-        { translateX: '-420vw' },
+        { translateX: this.calcSliderPosition(this.sliderCounter + 1) },
         {
           duration: 0,
-          begin: () => {
-            console.log(`jump begin : ${this.sliderCounter}`);
-          },
           complete: () => {
-            console.log(`jump complete : ${this.sliderCounter}`);
             this.changeActiveIndicator();
-            this.render();
+            this.moveSlide();
           }
         }
       );
     } else {
       this.changeActiveIndicator();
-      this.render();
+      this.moveSlide();
     }
   }
 
   trackingFinger() {
     if (!this.isFinger) return;
 
+    //スワイプ距離計算[px]
     const DISTANCE = this.fingerPosition.current - this.fingerPosition.previous;
+    //スワイプ距離変換[vw]
     this.DISTANCE_VW = (DISTANCE * 100) / window.innerWidth;
-    this.moveTo = this.sliderPosition + this.DISTANCE_VW + 'vw';
-    // console.log(`distance ${this.DISTANCE_VW}`);
-    // console.log(`move to ${this.moveTo}`);
+    //移動量計算
+    this.moveTo =
+      -(this.sliderCounter * this.sliderSize) + this.DISTANCE_VW + 'vw';
+
     velocity(this.$slider_list, { translateX: this.moveTo }, { duration: 0 });
 
     setTimeout(() => {
@@ -150,7 +158,6 @@ export default class {
     [...this.$sliderButton].forEach(element => {
       element.addEventListener('click', event => {
         velocity(this.$slider_list, 'stop', true);
-        // velocity(this.$slider_list, 'finish', true);
         if (element.dataset.order === 'after') {
           this.nextData();
         } else {
@@ -165,73 +172,84 @@ export default class {
         this.previousCounter = this.sliderCounter;
         this.sliderCounter = SELECT_NUMBER;
         this.changeActiveIndicator();
-        this.render();
+        this.moveSlide();
       });
     });
 
     this.$sliderWindow.addEventListener('touchstart', () => {
-      console.log('touchstart');
       let touchObject = event.changedTouches[0];
-      this.isFinger = true;
       this.fingerPosition.previous = touchObject.pageX;
       this.fingerPosition.current = touchObject.pageX;
-      this.sliderPosition = -(this.sliderCounter * this.sliderSize);
+      //指に追従させる
+      this.isFinger = true;
       this.trackingFinger();
     });
 
     this.$sliderWindow.addEventListener('touchmove', () => {
-      console.log('touchmove');
-      let touchObject = event.changedTouches[0];
-      this.fingerPosition.current = touchObject.pageX;
+      //座標更新
+      const TOUCH_OBJECT = event.changedTouches[0];
+      this.fingerPosition.current = TOUCH_OBJECT.pageX;
     });
 
     this.$sliderWindow.addEventListener('touchend', () => {
-      console.log('touchend');
       velocity(this.$slider_list, 'stop', true);
       this.isFinger = false;
 
-      if (this.DISTANCE_VW < -(this.sliderSize / 2)) {
-        if (this.sliderCounter === this.numberOfImages) {
-          this.previousCounter = this.sliderCounter;
-          this.sliderCounter++;
-          this.render();
-          this.sliderCounter = 1;
-          this.changeActiveIndicator();
-          velocity(
-            this.$slider_list,
-            { translateX: '-70vw' },
-            {
-              duration: 0
-            }
-          );
-        } else {
-          this.nextData();
-        }
-      } else if (this.DISTANCE_VW > this.sliderSize / 2) {
-        if (this.sliderCounter === 1) {
-          this.previousCounter = this.sliderCounter;
-          this.sliderCounter--;
-          this.render();
-          this.sliderCounter = this.numberOfImages;
-          this.changeActiveIndicator();
-          velocity(
-            this.$slider_list,
-            { translateX: '-350vw' },
-            {
-              duration: 0
-            }
-          );
-        } else {
-          this.previousData();
-        }
-      } else {
-        this.render();
-      }
+      //スライド移動実行
+      this.render();
       this.fingerPosition.previous = 0;
       this.fingerPosition.current = 0;
     });
   }
-
+  render() {
+    //スワイプ距離が半分超えたら次のスライドへ
+    if (this.DISTANCE_VW < -(this.sliderSize / 2)) {
+      //最後のスライドから最初へ飛ぶ場合
+      if (this.sliderCounter === this.numberOfImages) {
+        this.previousCounter = this.numberOfImages;
+        //最後の位置に複製した画像１へ送る
+        this.sliderCounter++;
+        this.moveSlide();
+        //最後の場所から本来の1番目の場所へジャンプ
+        this.sliderCounter = 1;
+        this.changeActiveIndicator();
+        velocity(
+          this.$slider_list,
+          { translateX: this.calcSliderPosition(this.sliderCounter) },
+          {
+            duration: 0
+          }
+        );
+        //通常通りの移動
+      } else {
+        this.nextData();
+      }
+    } else if (this.DISTANCE_VW > this.sliderSize / 2) {
+      //最初のスライドから最後へ飛ぶ場合
+      if (this.sliderCounter === 1) {
+        //最初の位置に複製した最終画像へ送る
+        this.previousCounter = 1;
+        this.sliderCounter--;
+        this.moveSlide();
+        //本来の場所へジャンプ
+        this.sliderCounter = this.numberOfImages;
+        this.changeActiveIndicator();
+        velocity(
+          this.$slider_list,
+          { translateX: this.calcSliderPosition(this.sliderCounter) },
+          {
+            duration: 0
+          }
+        );
+        //通常通りの移動
+      } else {
+        this.previousData();
+      }
+    } else {
+      //画像移動ない場合は元に戻す
+      this.moveSlide();
+    }
+  }
   /**
    * 初期準備
    */
