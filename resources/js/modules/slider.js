@@ -126,7 +126,7 @@ export default class {
       this.isFinger = false;
 
       //スライド移動実行
-      this.render();
+      this.judge();
       this.fingerPosition.previous = 0;
       this.fingerPosition.current = 0;
     });
@@ -231,7 +231,7 @@ export default class {
   /**
    * スライドをどう動かすかの判定
    */
-  render() {
+  judge() {
     //スワイプ距離が半分超えたら次のスライドへ
     if (this.DISTANCE_VW < -(this.sliderSize / 2)) {
       //最後のスライドから最初へ飛ぶ場合
