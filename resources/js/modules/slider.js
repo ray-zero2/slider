@@ -22,15 +22,15 @@ export default class {
       this.$slider_list.firstElementChild
     );
 
+    this.sliderCounter = 1;
     this.createIndicator();
     this.$DOT_ITEMS = this.$indicator.childNodes;
     //最初と最後の余分なの追加したあとの画像枚数
-    this.sliderCounter = 1;
+
     this.previousCounter = this.sliderCounter;
 
     this.sliderSize = 70;
     //最初に何枚目を表示するか、初期値
-
     velocity(this.$slider_list, { translateX: '-70vw' }, { duration: 0 });
 
     this.bind();
@@ -40,7 +40,7 @@ export default class {
     for (let i = 1; i <= this.numberOfImages; i++) {
       let $item = document.createElement('li');
       $item.dataset.number = i;
-      if (i === 1) $item.classList.add('current-image-dot');
+      if (i === this.sliderCounter) $item.classList.add('current-image-dot');
       dotFragment.appendChild($item);
     }
     this.$indicator.appendChild(dotFragment);
@@ -57,25 +57,73 @@ export default class {
     this.changeActiveIndicator();
     const POSITION = -(this.sliderCounter * this.sliderSize) + 'vw';
     // console.log(`move to ${POSITION}`);
-    velocity(this.$slider_list, 'finish', true);
 
     velocity(
       this.$slider_list,
       { translateX: POSITION },
       {
         duration: this.duration,
+        begin: () => {
+          console.log(`move begin : ${this.sliderCounter}`);
+        },
         complete: () => {
-          console.log(`render - complete`);
+          console.log(`move complete : ${this.sliderCounter}`);
         }
       }
     );
   }
 
+  nextData() {
+    this.sliderCounter++;
+    if (this.sliderCounter > this.numberOfImages) {
+      this.sliderCounter = 1;
+      velocity(
+        this.$slider_list,
+        { translateX: 0 },
+        {
+          duration: 0,
+          begin: () => {
+            console.log(`jump begin : ${this.sliderCounter}`);
+          },
+          complete: () => {
+            console.log(`jump complete : ${this.sliderCounter}`);
+            this.render();
+          }
+        }
+      );
+    } else {
+      this.render();
+    }
+  }
+  previousData() {
+    this.sliderCounter--;
+    if (this.sliderCounter < 1) {
+      // velocity(this.$slider_list, 'stop', true);
+      this.sliderCounter = this.numberOfImages;
+      velocity(
+        this.$slider_list,
+        { translateX: '-420vw' },
+        {
+          duration: 0,
+          begin: () => {
+            console.log(`jump begin : ${this.sliderCounter}`);
+          },
+          complete: () => {
+            console.log(`jump complete : ${this.sliderCounter}`);
+            this.render();
+          }
+        }
+      );
+    } else {
+      this.render();
+    }
+  }
+
   bind() {
     [...this.$sliderButton].forEach(element => {
       element.addEventListener('click', event => {
-        // if (this.isAnimation) return;
-        this.isAnimation = true;
+        velocity(this.$slider_list, 'stop', true);
+        // velocity(this.$slider_list, 'finish', true);
         this.previousCounter = this.sliderCounter;
         if (element.dataset.order === 'after') {
           this.nextData();
@@ -93,43 +141,5 @@ export default class {
         this.render();
       });
     });
-  }
-
-  nextData() {
-    this.sliderCounter++;
-    if (this.sliderCounter > this.numberOfImages) {
-      this.sliderCounter = 1;
-      velocity(
-        this.$slider_list,
-        { translateX: 0 },
-        {
-          duration: 0,
-          complete: () => {
-            this.render();
-          }
-        }
-      );
-    } else {
-      this.render();
-    }
-  }
-  previousData() {
-    this.sliderCounter--;
-    if (this.sliderCounter < 1) {
-      velocity(this.$slider_list, 'stop', true);
-      this.sliderCounter = this.numberOfImages;
-      velocity(
-        this.$slider_list,
-        { translateX: '-420vw' },
-        {
-          duration: 0,
-          complete: () => {
-            this.render();
-          }
-        }
-      );
-    } else {
-      this.render();
-    }
   }
 }
