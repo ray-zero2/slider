@@ -58,18 +58,6 @@ export default class {
     return -(slideNumber * slideWidth) + 'vw';
   }
 
-  /**
-   * インジケーターの表示切り替え
-   */
-  changeActiveIndicator() {
-    [...this.$dotIndicators].forEach($dotIndicator => {
-      $dotIndicator.classList.remove('current-image-dot');
-    });
-    [...this.$dotIndicators][this.currentSlideIndex].classList.add(
-      'current-image-dot'
-    );
-  }
-
   next() {
     this.currentSlideIndex++;
     if (this.currentSlideIndex > this.maxIndex) {
@@ -103,6 +91,15 @@ export default class {
   update() {
     this.changeActiveIndicator();
     this.slide();
+  }
+
+  changeActiveIndicator() {
+    const activeClass = 'current-image-dot';
+    [...this.$dotIndicators].forEach(($dotIndicator, index) => {
+      $dotIndicator.classList.remove(activeClass);
+      if (index === this.currentSlideIndex)
+        $dotIndicator.classList.add(activeClass);
+    });
   }
 
   slide() {
