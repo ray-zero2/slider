@@ -116,19 +116,19 @@ export default class {
 
   next() {
     this.sliderCounter++;
-
-    if (this.sliderCounter > this.numberOfImages) {
-      this.sliderCounter = 1;
-      this.goTo({ translateX: 0 });
-    } else {
-      this.changeActiveIndicator();
-      this.moveSlide();
-    }
+    this.xxx();
   }
 
   previous() {
     this.sliderCounter--;
-    if (this.sliderCounter < 1) {
+    this.xxx();
+  }
+
+  xxx() {
+    if (this.sliderCounter > this.numberOfImages) {
+      this.sliderCounter = 1;
+      this.goTo({ translateX: 0 });
+    } else if (this.sliderCounter < 1) {
       this.sliderCounter = this.numberOfImages;
       this.goTo({
         translateX: this.calcSliderPosition(this.sliderCounter + 1)
