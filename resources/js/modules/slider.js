@@ -89,11 +89,11 @@ export default class {
   }
 
   update() {
-    this.changeActiveIndicator();
+    this.updateActiveIndicator();
     this.slide();
   }
 
-  changeActiveIndicator() {
+  updateActiveIndicator() {
     const activeClass = 'current-image-dot';
     [...this.$dotIndicators].forEach(($dotIndicator, index) => {
       $dotIndicator.classList.remove(activeClass);
@@ -161,7 +161,7 @@ export default class {
       $element.addEventListener('click', event => {
         const SELECT_NUMBER = event.target.dataset.number;
         this.currentSlideIndex = SELECT_NUMBER;
-        this.changeActiveIndicator();
+        this.updateActiveIndicator();
         this.slide();
       });
     });
@@ -202,7 +202,7 @@ export default class {
   //       this.slide();
   //       // 最後の場所から本来の1番目の場所へジャンプ
   //       this.currentSlideIndex = 1;
-  //       this.changeActiveIndicator();
+  //       this.updateActiveIndicator();
   //       velocity(
   //         this.$sliderList,
   //         {
@@ -227,7 +227,7 @@ export default class {
   //       this.slide();
   //       // 本来の場所へジャンプ
   //       this.currentSlideIndex = this.slideLength;
-  //       this.changeActiveIndicator();
+  //       this.updateActiveIndicator();
   //       velocity(
   //         this.$sliderList,
   //         {
