@@ -131,17 +131,7 @@ export default class {
 
     if (this.sliderCounter > this.numberOfImages) {
       this.sliderCounter = 1;
-      velocity(
-        this.$sliderList,
-        { translateX: 0 },
-        {
-          duration: 0,
-          complete: () => {
-            this.changeActiveIndicator();
-            this.moveSlide();
-          }
-        }
-      );
+      this.goTo({ translateX: 0 });
     } else {
       this.changeActiveIndicator();
       this.moveSlide();
@@ -152,21 +142,27 @@ export default class {
     this.sliderCounter--;
     if (this.sliderCounter < 1) {
       this.sliderCounter = this.numberOfImages;
-      velocity(
-        this.$sliderList,
-        { translateX: this.calcSliderPosition(this.sliderCounter + 1) },
-        {
-          duration: 0,
-          complete: () => {
-            this.changeActiveIndicator();
-            this.moveSlide();
-          }
-        }
-      );
+      this.goTo({
+        translateX: this.calcSliderPosition(this.sliderCounter + 1)
+      });
     } else {
       this.changeActiveIndicator();
       this.moveSlide();
     }
+  }
+
+  goTo({ translateX }) {
+    velocity(
+      this.$sliderList,
+      { translateX },
+      {
+        duration: 0,
+        complete: () => {
+          this.changeActiveIndicator();
+          this.moveSlide();
+        }
+      }
+    );
   }
 
   trackingFinger() {
