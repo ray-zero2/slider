@@ -44,10 +44,10 @@ export default class {
   createDotIndicators({ dotsToShow }) {
     const $indicatorWrap = document.querySelector('.indicator');
     let dotFragment = document.createDocumentFragment();
-    for (let i = 1; i <= dotsToShow; i++) {
+    for (let index = 0; index < dotsToShow; index++) {
       let $item = document.createElement('li');
-      $item.dataset.number = i;
-      if (i === 1) $item.classList.add('current-image-dot');
+      $item.dataset.index = index;
+      if (index === 0) $item.classList.add('current-image-dot');
       dotFragment.appendChild($item);
     }
     $indicatorWrap.appendChild(dotFragment);
@@ -159,10 +159,8 @@ export default class {
 
     [...this.$dotIndicators].forEach($element => {
       $element.addEventListener('click', event => {
-        const SELECT_NUMBER = event.target.dataset.number;
-        this.currentSlideIndex = SELECT_NUMBER;
-        this.updateActiveIndicator();
-        this.slide();
+        this.currentSlideIndex = Number(event.target.dataset.index);
+        this.update();
       });
     });
 
