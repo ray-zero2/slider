@@ -112,19 +112,6 @@ export default class {
       }
     );
   }
-  /**
-   * slider移動(0秒)
-   */
-  jumpSlide(number) {
-    const POSITION = this.calcSliderPosition(number);
-    velocity(
-      this.$sliderList,
-      { translateX: POSITION },
-      {
-        duration: 0
-      }
-    );
-  }
 
   nextData() {
     this.sliderCounter++;
