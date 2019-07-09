@@ -11,18 +11,18 @@ export default class {
       dotsToShow: this.$sliderList.childElementCount
     });
 
-    //指スワイプで反応するレート
+    // 指スワイプで反応するレート
     this.fps = 30;
-    //スライダー画像サイズ[vw]
+    // スライダー画像サイズ[vw]
     this.slideWidth = 70;
-    //アニメーション動作時間[ms]
+    // アニメーション動作時間[ms]
     this.duration = 200;
-    //スライダー画像表示番号
+    // スライダー画像表示番号
     this.currentSlideNumber = 1;
 
     // スライドの数（クローンしたものは含まない）
     this.slideLength = this.$sliderList.childElementCount;
-    //タッチしたときの動きに関する部分
+    // タッチしたときの動きに関する部分
     this.isFinger = false;
     this.fingerPosition = {
       previous: 0,
@@ -158,11 +158,11 @@ export default class {
   // trackingFinger() {
   //   if (!this.isFinger) return;
 
-  //   //スワイプ距離計算[px]
+  //   // スワイプ距離計算[px]
   //   const DISTANCE = this.fingerPosition.current - this.fingerPosition.previous;
-  //   //スワイプ距離変換[vw]
+  //   // スワイプ距離変換[vw]
   //   this.DISTANCE_VW = (DISTANCE * 100) / window.innerWidth;
-  //   //移動量計算
+  //   // 移動量計算
   //   this.moveTo =
   //     -(this.currentSlideNumber * this.slideWidth) + this.DISTANCE_VW + 'vw';
 
@@ -197,13 +197,13 @@ export default class {
     //   const TOUCH_OBJECT = event.changedTouches[0];
     //   this.fingerPosition.previous = TOUCH_OBJECT.pageX;
     //   this.fingerPosition.current = TOUCH_OBJECT.pageX;
-    //   //指に追従させる
+    //   // 指に追従させる
     //   this.isFinger = true;
     //   this.trackingFinger();
     // });
 
     // this.$sliderWindow.addEventListener('touchmove', () => {
-    //   //座標更新
+    //   // 座標更新
     //   const TOUCH_OBJECT = event.changedTouches[0];
     //   this.fingerPosition.current = TOUCH_OBJECT.pageX;
     // });
@@ -212,7 +212,7 @@ export default class {
     //   velocity(this.$sliderList, 'stop', true);
     //   this.isFinger = false;
 
-    //   //スライド移動実行
+    //   // スライド移動実行
     //   this.render();
     //   this.fingerPosition.previous = 0;
     //   this.fingerPosition.current = 0;
@@ -220,14 +220,14 @@ export default class {
   }
 
   // render() {
-  //   //スワイプ距離が半分超えたら次のスライドへ
+  //   // スワイプ距離が半分超えたら次のスライドへ
   //   if (this.DISTANCE_VW < -(this.slideWidth / 2)) {
-  //     //最後のスライドから最初へ飛ぶ場合
+  //     // 最後のスライドから最初へ飛ぶ場合
   //     if (this.currentSlideNumber === this.slideLength) {
-  //       //最後の位置に複製した画像１へ送る
+  //       // 最後の位置に複製した画像１へ送る
   //       this.currentSlideNumber++;
   //       this.moveSlide();
-  //       //最後の場所から本来の1番目の場所へジャンプ
+  //       // 最後の場所から本来の1番目の場所へジャンプ
   //       this.currentSlideNumber = 1;
   //       this.changeActiveIndicator();
   //       velocity(
@@ -242,17 +242,17 @@ export default class {
   //           duration: 0
   //         }
   //       );
-  //       //通常通りの移動
+  //       // 通常通りの移動
   //     } else {
   //       this.next();
   //     }
   //   } else if (this.DISTANCE_VW > this.slideWidth / 2) {
-  //     //最初のスライドから最後へ飛ぶ場合
+  //     // 最初のスライドから最後へ飛ぶ場合
   //     if (this.currentSlideNumber === 1) {
   //       //最初の位置に複製した最終画像へ送る
   //       this.currentSlideNumber--;
   //       this.moveSlide();
-  //       //本来の場所へジャンプ
+  //       // 本来の場所へジャンプ
   //       this.currentSlideNumber = this.slideLength;
   //       this.changeActiveIndicator();
   //       velocity(
@@ -267,12 +267,12 @@ export default class {
   //           duration: 0
   //         }
   //       );
-  //       //通常通りの移動
+  //       // 通常通りの移動
   //     } else {
   //       this.previous();
   //     }
   //   } else {
-  //     //画像移動ない場合は元に戻す
+  //     // 画像移動ない場合は元に戻す
   //     this.moveSlide();
   //   }
   // }
