@@ -1,7 +1,8 @@
 // import velocity from 'velocity-animate';
 export default class {
   constructor() {
-    this.$sliderButton = document.querySelectorAll('.slider_btn');
+    this.$previousButton = document.querySelector('[data-order="before"]');
+    this.$nextButton = document.querySelector('[data-order="after"]');
     this.$sliderWindow = document.querySelector('.slider_window');
     this.$sliderList = document.querySelector('.slider_list');
     this.$image1 = document.querySelector('.slider_image1');
@@ -171,15 +172,14 @@ export default class {
   }
 
   bind() {
-    [...this.$sliderButton].forEach(element => {
-      element.addEventListener('click', event => {
-        velocity(this.$sliderList, 'stop', true);
-        if (element.dataset.order === 'after') {
-          this.nextData();
-        } else {
-          this.previousData();
-        }
-      });
+    this.$previousButton.addEventListener('click', () => {
+      velocity(this.$sliderList, 'stop', true);
+      this.previousData();
+    });
+
+    this.$nextButton.addEventListener('click', () => {
+      velocity(this.$sliderList, 'stop', true);
+      this.nextData();
     });
 
     [...this.$dotIndicators].forEach($element => {
