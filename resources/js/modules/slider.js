@@ -18,7 +18,7 @@ export default class {
     //アニメーション動作時間[ms]
     this.duration = 200;
     //スライダー画像表示番号
-    this.sliderCounter = 1;
+    this.currentSlideNumber = 1;
 
     //現在の画像枚数取得
     this.numberOfImages = this.$sliderList.childElementCount;
@@ -76,7 +76,9 @@ export default class {
   }
 
   goToFirstPosition() {
-    const SLIDER_FIRST_POSITION = this.calcSliderPosition(this.sliderCounter);
+    const SLIDER_FIRST_POSITION = this.calcSliderPosition(
+      this.currentSlideNumber
+    );
     velocity(
       this.$sliderList,
       { translateX: SLIDER_FIRST_POSITION },
@@ -95,7 +97,7 @@ export default class {
     [...this.$dotIndicators].forEach($dotIndicator => {
       $dotIndicator.classList.remove('current-image-dot');
     });
-    [...this.$dotIndicators][this.sliderCounter - 1].classList.add(
+    [...this.$dotIndicators][this.currentSlideNumber - 1].classList.add(
       'current-image-dot'
     );
   }
@@ -104,7 +106,7 @@ export default class {
    * slider移動
    */
   moveSlide() {
-    const POSITION = this.calcSliderPosition(this.sliderCounter);
+    const POSITION = this.calcSliderPosition(this.currentSlideNumber);
     velocity(
       this.$sliderList,
       { translateX: POSITION },
@@ -115,23 +117,23 @@ export default class {
   }
 
   next() {
-    this.sliderCounter++;
+    this.currentSlideNumber++;
     this.xxx();
   }
 
   previous() {
-    this.sliderCounter--;
+    this.currentSlideNumber--;
     this.xxx();
   }
 
   xxx() {
-    if (this.sliderCounter > this.numberOfImages) {
-      this.sliderCounter = 1;
+    if (this.currentSlideNumber > this.numberOfImages) {
+      this.currentSlideNumber = 1;
       this.goTo({ translateX: 0 });
-    } else if (this.sliderCounter < 1) {
-      this.sliderCounter = this.numberOfImages;
+    } else if (this.currentSlideNumber < 1) {
+      this.currentSlideNumber = this.numberOfImages;
       this.goTo({
-        translateX: this.calcSliderPosition(this.sliderCounter + 1)
+        translateX: this.calcSliderPosition(this.currentSlideNumber + 1)
       });
     } else {
       this.changeActiveIndicator();
@@ -162,7 +164,7 @@ export default class {
     this.DISTANCE_VW = (DISTANCE * 100) / window.innerWidth;
     //移動量計算
     this.moveTo =
-      -(this.sliderCounter * this.slideWidth) + this.DISTANCE_VW + 'vw';
+      -(this.currentSlideNumber * this.slideWidth) + this.DISTANCE_VW + 'vw';
 
     velocity(this.$sliderList, { translateX: this.moveTo }, { duration: 0 });
 
@@ -185,7 +187,7 @@ export default class {
     [...this.$dotIndicators].forEach($element => {
       $element.addEventListener('click', event => {
         const SELECT_NUMBER = event.target.dataset.number;
-        this.sliderCounter = SELECT_NUMBER;
+        this.currentSlideNumber = SELECT_NUMBER;
         this.changeActiveIndicator();
         this.moveSlide();
       });
@@ -220,16 +222,16 @@ export default class {
     //スワイプ距離が半分超えたら次のスライドへ
     if (this.DISTANCE_VW < -(this.slideWidth / 2)) {
       //最後のスライドから最初へ飛ぶ場合
-      if (this.sliderCounter === this.numberOfImages) {
+      if (this.currentSlideNumber === this.numberOfImages) {
         //最後の位置に複製した画像１へ送る
-        this.sliderCounter++;
+        this.currentSlideNumber++;
         this.moveSlide();
         //最後の場所から本来の1番目の場所へジャンプ
-        this.sliderCounter = 1;
+        this.currentSlideNumber = 1;
         this.changeActiveIndicator();
         velocity(
           this.$sliderList,
-          { translateX: this.calcSliderPosition(this.sliderCounter) },
+          { translateX: this.calcSliderPosition(this.currentSlideNumber) },
           {
             duration: 0
           }
@@ -240,16 +242,16 @@ export default class {
       }
     } else if (this.DISTANCE_VW > this.slideWidth / 2) {
       //最初のスライドから最後へ飛ぶ場合
-      if (this.sliderCounter === 1) {
+      if (this.currentSlideNumber === 1) {
         //最初の位置に複製した最終画像へ送る
-        this.sliderCounter--;
+        this.currentSlideNumber--;
         this.moveSlide();
         //本来の場所へジャンプ
-        this.sliderCounter = this.numberOfImages;
+        this.currentSlideNumber = this.numberOfImages;
         this.changeActiveIndicator();
         velocity(
           this.$sliderList,
-          { translateX: this.calcSliderPosition(this.sliderCounter) },
+          { translateX: this.calcSliderPosition(this.currentSlideNumber) },
           {
             duration: 0
           }
