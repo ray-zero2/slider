@@ -70,30 +70,6 @@ export default class {
     );
   }
 
-  /**
-   * slider移動
-   */
-  moveSlide() {
-    const POSITION = this.getSliderTranslateX(
-      this.currentSlideIndex,
-      this.slideWidth
-    );
-    velocity(
-      this.$sliderList,
-      { translateX: POSITION },
-      {
-        duration: this.duration,
-        queue: 'goTo',
-        complete: () => {
-          this.$slides[0].style.transform = 'initial';
-          this.$slides[this.maxIndex].style.transform = 'initial';
-        }
-      }
-    );
-
-    velocity.Utilities.dequeue(this.$sliderList, 'goTo');
-  }
-
   next() {
     this.currentSlideIndex++;
     if (this.currentSlideIndex > this.maxIndex) {
@@ -105,7 +81,7 @@ export default class {
         translateX: this.getSliderTranslateX(-1, this.slideWidth)
       });
     }
-    this.xxx();
+    this.update();
   }
 
   previous() {
@@ -121,12 +97,34 @@ export default class {
         )
       });
     }
-    this.xxx();
+    this.update();
   }
 
-  xxx() {
+  update() {
     this.changeActiveIndicator();
-    this.moveSlide();
+    this.slide();
+  }
+
+  slide() {
+    velocity(
+      this.$sliderList,
+      {
+        translateX: this.getSliderTranslateX(
+          this.currentSlideIndex,
+          this.slideWidth
+        )
+      },
+      {
+        duration: this.duration,
+        queue: 'goTo',
+        complete: () => {
+          this.$slides[0].style.transform = 'initial';
+          this.$slides[this.maxIndex].style.transform = 'initial';
+        }
+      }
+    );
+
+    velocity.Utilities.dequeue(this.$sliderList, 'goTo');
   }
 
   jump({ translateX }) {
@@ -167,7 +165,7 @@ export default class {
         const SELECT_NUMBER = event.target.dataset.number;
         this.currentSlideIndex = SELECT_NUMBER;
         this.changeActiveIndicator();
-        this.moveSlide();
+        this.slide();
       });
     });
 
@@ -204,7 +202,7 @@ export default class {
   //     if (this.currentSlideIndex === this.slideLength) {
   //       // 最後の位置に複製した画像１へ送る
   //       this.currentSlideIndex++;
-  //       this.moveSlide();
+  //       this.slide();
   //       // 最後の場所から本来の1番目の場所へジャンプ
   //       this.currentSlideIndex = 1;
   //       this.changeActiveIndicator();
@@ -229,7 +227,7 @@ export default class {
   //     if (this.currentSlideIndex === 1) {
   //       //最初の位置に複製した最終画像へ送る
   //       this.currentSlideIndex--;
-  //       this.moveSlide();
+  //       this.slide();
   //       // 本来の場所へジャンプ
   //       this.currentSlideIndex = this.slideLength;
   //       this.changeActiveIndicator();
@@ -251,7 +249,7 @@ export default class {
   //     }
   //   } else {
   //     // 画像移動ない場合は元に戻す
-  //     this.moveSlide();
+  //     this.slide();
   //   }
   // }
 }
