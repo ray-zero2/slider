@@ -35,8 +35,28 @@ export default class {
     this.bind();
   }
 
-  calcSliderPosition(number) {
-    return -(number * this.sliderSize) + 'vw';
+  /**
+   * 初期準備
+   */
+  initialize() {
+    // 最初と最後の画像を複製してリストに追加
+    this.cloneSlides();
+
+    // インジケータ作成
+    this.createIndicator();
+
+    // スライダー初期位置に移動
+    this.goToFirstPosition();
+  }
+
+  cloneSlides() {
+    const $FIRST_IMAGE = this.$sliderList.firstElementChild.cloneNode(true);
+    const $LAST_IMAGE = this.$sliderList.lastElementChild.cloneNode(true);
+    this.$sliderList.appendChild($FIRST_IMAGE);
+    this.$sliderList.insertBefore(
+      $LAST_IMAGE,
+      this.$sliderList.firstElementChild
+    );
   }
 
   /**
@@ -52,6 +72,19 @@ export default class {
       dotFragment.appendChild($item);
     }
     this.$indicator.appendChild(dotFragment);
+  }
+
+  goToFirstPosition() {
+    const SLIDER_FIRST_POSITION = this.calcSliderPosition(this.sliderCounter);
+    velocity(
+      this.$sliderList,
+      { translateX: SLIDER_FIRST_POSITION },
+      { duration: 0 }
+    );
+  }
+
+  calcSliderPosition(number) {
+    return -(number * this.sliderSize) + 'vw';
   }
 
   /**
@@ -249,29 +282,5 @@ export default class {
       //画像移動ない場合は元に戻す
       this.moveSlide();
     }
-  }
-  /**
-   * 初期準備
-   */
-  initialize() {
-    //最初と最後の画像を複製してリストに追加
-    const $FIRST_IMAGE = this.$sliderList.firstElementChild.cloneNode(true);
-    const $LAST_IMAGE = this.$sliderList.lastElementChild.cloneNode(true);
-    this.$sliderList.appendChild($FIRST_IMAGE);
-    this.$sliderList.insertBefore(
-      $LAST_IMAGE,
-      this.$sliderList.firstElementChild
-    );
-
-    //インジケータ作成
-    this.createIndicator();
-
-    //スライダー初期位置に移動
-    const SLIDER_FIRST_POSITION = this.calcSliderPosition(this.sliderCounter);
-    velocity(
-      this.$sliderList,
-      { translateX: SLIDER_FIRST_POSITION },
-      { duration: 0 }
-    );
   }
 }
