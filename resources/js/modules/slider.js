@@ -65,9 +65,12 @@ export default class {
       this.$slides[this.maxIndex].style.transform = `translateX(${-this
         .slideWidth *
         (this.maxIndex + 1)}vw)`;
-      this.jump({
-        translateX: this.getSliderTranslateX(-1, this.slideWidth)
-      });
+      this.addSlideQueue(
+        {
+          translateX: this.getSliderTranslateX(-1, this.slideWidth)
+        },
+        { duration: 0 }
+      );
     }
     this.update();
   }
@@ -78,12 +81,15 @@ export default class {
       this.currentSlideIndex = this.maxIndex;
       this.$slides[0].style.transform = `translateX(${this.slideWidth *
         (this.maxIndex + 1)}vw)`;
-      this.jump({
-        translateX: this.getSliderTranslateX(
-          this.currentSlideIndex + 1,
-          this.slideWidth
-        )
-      });
+      this.addSlideQueue(
+        {
+          translateX: this.getSliderTranslateX(
+            this.currentSlideIndex + 1,
+            this.slideWidth
+          )
+        },
+        { duration: 0 }
+      );
     }
     this.update();
   }
@@ -113,7 +119,7 @@ export default class {
       },
       {
         duration: this.duration,
-        queue: 'goTo',
+        queue: 'slide',
         complete: () => {
           this.$slides[0].style.transform = 'initial';
           this.$slides[this.maxIndex].style.transform = 'initial';
@@ -121,11 +127,11 @@ export default class {
       }
     );
 
-    velocity.Utilities.dequeue(this.$sliderList, 'goTo');
+    velocity.Utilities.dequeue(this.$sliderList, 'slide');
   }
 
-  jump({ translateX }) {
-    velocity(this.$sliderList, { translateX }, { duration: 0, queue: 'goTo' });
+  addSlideQueue(properties, options) {
+    velocity(this.$sliderList, properties, { ...options, queue: 'slide' });
   }
 
   // trackingFinger() {
