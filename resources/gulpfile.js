@@ -8,7 +8,6 @@ const outputPath = baseDirectory + "./public/css/";  //outputディレクトリ�
 const {src, dest, watch, series} = require("gulp");
 const {init, reload} = require("browser-sync");
 const sass= require("gulp-sass");
-const pleeease= require("gulp-pleeease");
 const plumber= require("gulp-plumber");
 const notify= require("gulp-notify");
 
@@ -20,12 +19,12 @@ function mojidasuyo(cb){
 
 function scssCompile(cb){
   src(scssPath + "**/*.scss")
-    .pipe(plumber({ 
+    .pipe(plumber({
       errorHandler: notify.onError({
         title: "SASS ERROR",
         message: "<%= error.message %>"
       })
-    })) 
+    }))
     .pipe(sass({
       outputStyle: "expanded",
       errLogToConsole: false
@@ -38,7 +37,7 @@ function scssCompile(cb){
 function serverStart(cb){
   init({
     server: {
-      baseDir: baseDirectory 
+      baseDir: baseDirectory
     },
     startPath: indexHtmlPath + "index.html",
     notify: false
@@ -54,10 +53,10 @@ function browserReload(cb){
 
 function watchFiles(cb){
   watch(baseDirectory + "**/*.html", browserReload);
-  watch(baseDirectory + "**/*.scss", 
+  watch(baseDirectory + "**/*.scss",
     series(scssCompile, browserReload)
   );
-  
+
   cb();
 }
 
