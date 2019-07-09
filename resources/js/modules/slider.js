@@ -29,7 +29,7 @@ export default class {
     this.frameTime = 1000 / this.fps;
     //初期化
     this.initialize();
-    this.$DOT_ITEMS = this.$indicator.childNodes;
+    this.$indicatorDots = this.$indicator.childNodes;
 
     //イベント生成
     this.bind();
@@ -91,10 +91,12 @@ export default class {
    * インジケーターの表示切り替え
    */
   changeActiveIndicator() {
-    [...this.$DOT_ITEMS][this.previousCounter].classList.remove(
+    [...this.$indicatorDots][this.previousCounter].classList.remove(
       'current-image-dot'
     );
-    [...this.$DOT_ITEMS][this.sliderCounter].classList.add('current-image-dot');
+    [...this.$indicatorDots][this.sliderCounter].classList.add(
+      'current-image-dot'
+    );
   }
 
   /**
@@ -199,7 +201,7 @@ export default class {
       });
     });
 
-    [...this.$DOT_ITEMS].forEach($element => {
+    [...this.$indicatorDots].forEach($element => {
       $element.addEventListener('click', event => {
         const SELECT_NUMBER = event.target.dataset.number;
         this.previousCounter = this.sliderCounter;
