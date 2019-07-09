@@ -76,8 +76,9 @@ export default class {
   }
 
   goToFirstPosition() {
-    const SLIDER_FIRST_POSITION = this.calcSliderPosition(
-      this.currentSlideNumber
+    const SLIDER_FIRST_POSITION = this.getSliderTranslateX(
+      this.currentSlideNumber,
+      this.slideWidth
     );
     velocity(
       this.$sliderList,
@@ -86,8 +87,8 @@ export default class {
     );
   }
 
-  calcSliderPosition(number) {
-    return -(number * this.slideWidth) + 'vw';
+  getSliderTranslateX(slideNumber, slideWidth) {
+    return -(slideNumber * slideWidth) + 'vw';
   }
 
   /**
@@ -106,7 +107,10 @@ export default class {
    * slider移動
    */
   moveSlide() {
-    const POSITION = this.calcSliderPosition(this.currentSlideNumber);
+    const POSITION = this.getSliderTranslateX(
+      this.currentSlideNumber,
+      this.slideWidth
+    );
     velocity(
       this.$sliderList,
       { translateX: POSITION },
@@ -133,7 +137,10 @@ export default class {
     if (this.currentSlideNumber < 1) {
       this.currentSlideNumber = this.numberOfImages;
       this.goTo({
-        translateX: this.calcSliderPosition(this.currentSlideNumber + 1)
+        translateX: this.getSliderTranslateX(
+          this.currentSlideNumber + 1,
+          this.slideWidth
+        )
       });
     }
     this.xxx();
@@ -224,7 +231,12 @@ export default class {
         this.changeActiveIndicator();
         velocity(
           this.$sliderList,
-          { translateX: this.calcSliderPosition(this.currentSlideNumber) },
+          {
+            translateX: this.getSliderTranslateX(
+              this.currentSlideNumber,
+              this.slideWidth
+            )
+          },
           {
             duration: 0
           }
@@ -244,7 +256,12 @@ export default class {
         this.changeActiveIndicator();
         velocity(
           this.$sliderList,
-          { translateX: this.calcSliderPosition(this.currentSlideNumber) },
+          {
+            translateX: this.getSliderTranslateX(
+              this.currentSlideNumber,
+              this.slideWidth
+            )
+          },
           {
             duration: 0
           }
