@@ -62,9 +62,7 @@ export default class {
     this.currentSlideIndex++;
     if (this.currentSlideIndex > this.maxIndex) {
       this.currentSlideIndex = 0;
-      this.$slides[this.maxIndex].style.transform = `translateX(${-this
-        .slideWidth *
-        (this.maxIndex + 1)}vw)`;
+      this.setMostLeftPosition(this.$slides[this.maxIndex]);
       this.addSlideQueue(
         {
           translateX: this.getSliderTranslateX(-1, this.slideWidth)
@@ -75,12 +73,18 @@ export default class {
     this.update();
   }
 
+  setMostLeftPosition($element) {
+    $element.style.transform = `translateX(${this.getSliderTranslateX(
+      this.maxIndex + 1,
+      this.slideWidth
+    )})`;
+  }
+
   previous() {
     this.currentSlideIndex--;
     if (this.currentSlideIndex < 0) {
       this.currentSlideIndex = this.maxIndex;
-      this.$slides[0].style.transform = `translateX(${this.slideWidth *
-        (this.maxIndex + 1)}vw)`;
+      this.setMostRightPosition(this.$slides[0]);
       this.addSlideQueue(
         {
           translateX: this.getSliderTranslateX(
@@ -92,6 +96,13 @@ export default class {
       );
     }
     this.update();
+  }
+
+  setMostRightPosition($element) {
+    $element.style.transform = `translateX(${this.getSliderTranslateX(
+      this.maxIndex + 1,
+      -this.slideWidth
+    )})`;
   }
 
   update() {
