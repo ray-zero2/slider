@@ -14,7 +14,7 @@ export default class {
     //指スワイプで反応するレート
     this.fps = 30;
     //スライダー画像サイズ[vw]
-    this.sliderSize = 70;
+    this.slideWidth = 70;
     //アニメーション動作時間[ms]
     this.duration = 200;
     //スライダー画像表示番号
@@ -85,7 +85,7 @@ export default class {
   }
 
   calcSliderPosition(number) {
-    return -(number * this.sliderSize) + 'vw';
+    return -(number * this.slideWidth) + 'vw';
   }
 
   /**
@@ -114,7 +114,7 @@ export default class {
     );
   }
 
-  nextData() {
+  next() {
     this.sliderCounter++;
 
     if (this.sliderCounter > this.numberOfImages) {
@@ -126,7 +126,7 @@ export default class {
     }
   }
 
-  previousData() {
+  previous() {
     this.sliderCounter--;
     if (this.sliderCounter < 1) {
       this.sliderCounter = this.numberOfImages;
@@ -162,7 +162,7 @@ export default class {
     this.DISTANCE_VW = (DISTANCE * 100) / window.innerWidth;
     //移動量計算
     this.moveTo =
-      -(this.sliderCounter * this.sliderSize) + this.DISTANCE_VW + 'vw';
+      -(this.sliderCounter * this.slideWidth) + this.DISTANCE_VW + 'vw';
 
     velocity(this.$sliderList, { translateX: this.moveTo }, { duration: 0 });
 
@@ -174,12 +174,12 @@ export default class {
   bind() {
     this.$previousButton.addEventListener('click', () => {
       velocity(this.$sliderList, 'stop', true);
-      this.previousData();
+      this.previous();
     });
 
     this.$nextButton.addEventListener('click', () => {
       velocity(this.$sliderList, 'stop', true);
-      this.nextData();
+      this.next();
     });
 
     [...this.$dotIndicators].forEach($element => {
@@ -218,7 +218,7 @@ export default class {
   }
   render() {
     //スワイプ距離が半分超えたら次のスライドへ
-    if (this.DISTANCE_VW < -(this.sliderSize / 2)) {
+    if (this.DISTANCE_VW < -(this.slideWidth / 2)) {
       //最後のスライドから最初へ飛ぶ場合
       if (this.sliderCounter === this.numberOfImages) {
         //最後の位置に複製した画像１へ送る
@@ -236,9 +236,9 @@ export default class {
         );
         //通常通りの移動
       } else {
-        this.nextData();
+        this.next();
       }
-    } else if (this.DISTANCE_VW > this.sliderSize / 2) {
+    } else if (this.DISTANCE_VW > this.slideWidth / 2) {
       //最初のスライドから最後へ飛ぶ場合
       if (this.sliderCounter === 1) {
         //最初の位置に複製した最終画像へ送る
@@ -256,7 +256,7 @@ export default class {
         );
         //通常通りの移動
       } else {
-        this.previousData();
+        this.previous();
       }
     } else {
       //画像移動ない場合は元に戻す
