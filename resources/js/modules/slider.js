@@ -5,6 +5,7 @@ export default class {
     this.$nextButton = document.querySelector('[data-order="after"]');
     this.$sliderWindow = document.querySelector('.slider_window');
     this.$sliderList = document.querySelector('.slider_list');
+    this.$slides = this.$sliderList.querySelectorAll('.slider_items');
     this.$image1 = document.querySelector('.slider_image1');
     this.$image5 = document.querySelector('.slider_image5');
     this.$dotIndicators = this.createDotIndicators({
@@ -17,11 +18,12 @@ export default class {
     this.slideWidth = 70;
     // アニメーション動作時間[ms]
     this.duration = 200;
-    // スライダー画像表示番号
-    this.currentSlideNumber = 1;
-
-    // スライドの数（クローンしたものは含まない）
-    this.slideLength = this.$sliderList.childElementCount;
+    // 表示しているスライダーのインデックス
+    this.currentSlideIndex = 0;
+    // スライドの数
+    this.slideLength = this.$slides.length;
+    // 最大のインデックス
+    this.maxIndex = this.slideLength - 1;
     // タッチしたときの動きに関する部分
     this.isFinger = false;
     this.fingerPosition = {
@@ -40,21 +42,8 @@ export default class {
    * 初期準備
    */
   initialize() {
-    // 最初と最後の画像を複製してリストに追加
-    this.cloneSlides();
-
     // スライダー初期位置に移動
     this.goToFirstPosition();
-  }
-
-  cloneSlides() {
-    const $FIRST_IMAGE = this.$sliderList.firstElementChild.cloneNode(true);
-    const $LAST_IMAGE = this.$sliderList.lastElementChild.cloneNode(true);
-    this.$sliderList.appendChild($FIRST_IMAGE);
-    this.$sliderList.insertBefore(
-      $LAST_IMAGE,
-      this.$sliderList.firstElementChild
-    );
   }
 
   /**
@@ -77,7 +66,7 @@ export default class {
 
   goToFirstPosition() {
     const SLIDER_FIRST_POSITION = this.getSliderTranslateX(
-      this.currentSlideNumber,
+      this.currentSlideIndex,
       this.slideWidth
     );
     velocity(
@@ -98,7 +87,7 @@ export default class {
     [...this.$dotIndicators].forEach($dotIndicator => {
       $dotIndicator.classList.remove('current-image-dot');
     });
-    [...this.$dotIndicators][this.currentSlideNumber - 1].classList.add(
+    [...this.$dotIndicators][this.currentSlideIndex].classList.add(
       'current-image-dot'
     );
   }
@@ -108,7 +97,7 @@ export default class {
    */
   moveSlide() {
     const POSITION = this.getSliderTranslateX(
-      this.currentSlideNumber,
+      this.currentSlideIndex,
       this.slideWidth
     );
     velocity(
@@ -116,7 +105,11 @@ export default class {
       { translateX: POSITION },
       {
         duration: this.duration,
-        queue: 'goTo'
+        queue: 'goTo',
+        complete: () => {
+          this.$slides[0].style.transform = 'initial';
+          this.$slides[this.maxIndex].style.transform = 'initial';
+        }
       }
     );
 
@@ -124,21 +117,28 @@ export default class {
   }
 
   next() {
-    this.currentSlideNumber++;
-    if (this.currentSlideNumber > this.slideLength) {
-      this.currentSlideNumber = 1;
-      this.jump({ translateX: 0 });
+    this.currentSlideIndex++;
+    if (this.currentSlideIndex > this.maxIndex) {
+      this.currentSlideIndex = 0;
+      this.$slides[this.maxIndex].style.transform = `translateX(${-this
+        .slideWidth *
+        (this.maxIndex + 1)}vw)`;
+      this.jump({
+        translateX: this.getSliderTranslateX(-1, this.slideWidth)
+      });
     }
     this.xxx();
   }
 
   previous() {
-    this.currentSlideNumber--;
-    if (this.currentSlideNumber < 1) {
-      this.currentSlideNumber = this.slideLength;
+    this.currentSlideIndex--;
+    if (this.currentSlideIndex < 0) {
+      this.currentSlideIndex = this.maxIndex;
+      this.$slides[0].style.transform = `translateX(${this.slideWidth *
+        (this.maxIndex + 1)}vw)`;
       this.jump({
         translateX: this.getSliderTranslateX(
-          this.currentSlideNumber + 1,
+          this.currentSlideIndex + 1,
           this.slideWidth
         )
       });
@@ -164,7 +164,7 @@ export default class {
   //   this.DISTANCE_VW = (DISTANCE * 100) / window.innerWidth;
   //   // 移動量計算
   //   this.moveTo =
-  //     -(this.currentSlideNumber * this.slideWidth) + this.DISTANCE_VW + 'vw';
+  //     -(this.currentSlideIndex * this.slideWidth) + this.DISTANCE_VW + 'vw';
 
   //   velocity(this.$sliderList, { translateX: this.moveTo }, { duration: 0 });
 
@@ -187,7 +187,7 @@ export default class {
     [...this.$dotIndicators].forEach($element => {
       $element.addEventListener('click', event => {
         const SELECT_NUMBER = event.target.dataset.number;
-        this.currentSlideNumber = SELECT_NUMBER;
+        this.currentSlideIndex = SELECT_NUMBER;
         this.changeActiveIndicator();
         this.moveSlide();
       });
@@ -223,18 +223,18 @@ export default class {
   //   // スワイプ距離が半分超えたら次のスライドへ
   //   if (this.DISTANCE_VW < -(this.slideWidth / 2)) {
   //     // 最後のスライドから最初へ飛ぶ場合
-  //     if (this.currentSlideNumber === this.slideLength) {
+  //     if (this.currentSlideIndex === this.slideLength) {
   //       // 最後の位置に複製した画像１へ送る
-  //       this.currentSlideNumber++;
+  //       this.currentSlideIndex++;
   //       this.moveSlide();
   //       // 最後の場所から本来の1番目の場所へジャンプ
-  //       this.currentSlideNumber = 1;
+  //       this.currentSlideIndex = 1;
   //       this.changeActiveIndicator();
   //       velocity(
   //         this.$sliderList,
   //         {
   //           translateX: this.getSliderTranslateX(
-  //             this.currentSlideNumber,
+  //             this.currentSlideIndex,
   //             this.slideWidth
   //           )
   //         },
@@ -248,18 +248,18 @@ export default class {
   //     }
   //   } else if (this.DISTANCE_VW > this.slideWidth / 2) {
   //     // 最初のスライドから最後へ飛ぶ場合
-  //     if (this.currentSlideNumber === 1) {
+  //     if (this.currentSlideIndex === 1) {
   //       //最初の位置に複製した最終画像へ送る
-  //       this.currentSlideNumber--;
+  //       this.currentSlideIndex--;
   //       this.moveSlide();
   //       // 本来の場所へジャンプ
-  //       this.currentSlideNumber = this.slideLength;
+  //       this.currentSlideIndex = this.slideLength;
   //       this.changeActiveIndicator();
   //       velocity(
   //         this.$sliderList,
   //         {
   //           translateX: this.getSliderTranslateX(
-  //             this.currentSlideNumber,
+  //             this.currentSlideIndex,
   //             this.slideWidth
   //           )
   //         },

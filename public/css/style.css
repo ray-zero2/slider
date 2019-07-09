@@ -31,7 +31,6 @@ img {
   min-width: 100%;
   min-height: 100%;
   width: 70vw;
-  transition: 0.5s;
 }
 
 .slider_wrapper .slider_contents .indicator {
