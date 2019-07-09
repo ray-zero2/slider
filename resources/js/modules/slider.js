@@ -20,8 +20,8 @@ export default class {
     //スライダー画像表示番号
     this.currentSlideNumber = 1;
 
-    //現在の画像枚数取得
-    this.numberOfImages = this.$sliderList.childElementCount;
+    // スライドの数（クローンしたものは含まない）
+    this.slideLength = this.$sliderList.childElementCount;
     //タッチしたときの動きに関する部分
     this.isFinger = false;
     this.fingerPosition = {
@@ -125,7 +125,7 @@ export default class {
 
   next() {
     this.currentSlideNumber++;
-    if (this.currentSlideNumber > this.numberOfImages) {
+    if (this.currentSlideNumber > this.slideLength) {
       this.currentSlideNumber = 1;
       this.jump({ translateX: 0 });
     }
@@ -135,7 +135,7 @@ export default class {
   previous() {
     this.currentSlideNumber--;
     if (this.currentSlideNumber < 1) {
-      this.currentSlideNumber = this.numberOfImages;
+      this.currentSlideNumber = this.slideLength;
       this.jump({
         translateX: this.getSliderTranslateX(
           this.currentSlideNumber + 1,
@@ -223,7 +223,7 @@ export default class {
   //   //スワイプ距離が半分超えたら次のスライドへ
   //   if (this.DISTANCE_VW < -(this.slideWidth / 2)) {
   //     //最後のスライドから最初へ飛ぶ場合
-  //     if (this.currentSlideNumber === this.numberOfImages) {
+  //     if (this.currentSlideNumber === this.slideLength) {
   //       //最後の位置に複製した画像１へ送る
   //       this.currentSlideNumber++;
   //       this.moveSlide();
@@ -253,7 +253,7 @@ export default class {
   //       this.currentSlideNumber--;
   //       this.moveSlide();
   //       //本来の場所へジャンプ
-  //       this.currentSlideNumber = this.numberOfImages;
+  //       this.currentSlideNumber = this.slideLength;
   //       this.changeActiveIndicator();
   //       velocity(
   //         this.$sliderList,
