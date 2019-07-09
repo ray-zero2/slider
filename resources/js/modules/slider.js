@@ -18,7 +18,6 @@ export default class {
     this.duration = 200;
     //スライダー画像表示番号
     this.sliderCounter = 1;
-    this.previousCounter = this.sliderCounter;
 
     //現在の画像枚数取得
     this.numberOfImages = this.$sliderList.childElementCount;
@@ -72,7 +71,7 @@ export default class {
       dotFragment.appendChild($item);
     }
     $indicatorWrap.appendChild(dotFragment);
-    return $indicatorWrap.childNodes;
+    return $indicatorWrap.querySelectorAll('li');
   }
 
   goToFirstPosition() {
@@ -92,10 +91,10 @@ export default class {
    * インジケーターの表示切り替え
    */
   changeActiveIndicator() {
-    [...this.$dotIndicators][this.previousCounter].classList.remove(
-      'current-image-dot'
-    );
-    [...this.$dotIndicators][this.sliderCounter].classList.add(
+    [...this.$dotIndicators].forEach($dotIndicator => {
+      $dotIndicator.classList.remove('current-image-dot');
+    });
+    [...this.$dotIndicators][this.sliderCounter - 1].classList.add(
       'current-image-dot'
     );
   }
@@ -128,7 +127,6 @@ export default class {
   }
 
   nextData() {
-    this.previousCounter = this.sliderCounter;
     this.sliderCounter++;
 
     if (this.sliderCounter > this.numberOfImages) {
@@ -151,7 +149,6 @@ export default class {
   }
 
   previousData() {
-    this.previousCounter = this.sliderCounter;
     this.sliderCounter--;
     if (this.sliderCounter < 1) {
       this.sliderCounter = this.numberOfImages;
@@ -205,7 +202,6 @@ export default class {
     [...this.$dotIndicators].forEach($element => {
       $element.addEventListener('click', event => {
         const SELECT_NUMBER = event.target.dataset.number;
-        this.previousCounter = this.sliderCounter;
         this.sliderCounter = SELECT_NUMBER;
         this.changeActiveIndicator();
         this.moveSlide();
@@ -242,7 +238,6 @@ export default class {
     if (this.DISTANCE_VW < -(this.sliderSize / 2)) {
       //最後のスライドから最初へ飛ぶ場合
       if (this.sliderCounter === this.numberOfImages) {
-        this.previousCounter = this.numberOfImages;
         //最後の位置に複製した画像１へ送る
         this.sliderCounter++;
         this.moveSlide();
@@ -264,7 +259,6 @@ export default class {
       //最初のスライドから最後へ飛ぶ場合
       if (this.sliderCounter === 1) {
         //最初の位置に複製した最終画像へ送る
-        this.previousCounter = 1;
         this.sliderCounter--;
         this.moveSlide();
         //本来の場所へジャンプ
