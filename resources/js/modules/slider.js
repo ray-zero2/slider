@@ -31,19 +31,9 @@ export default class {
       current: 0
     };
     this.frameTime = 1000 / this.fps;
-    //初期化
-    this.initialize();
 
     //イベント生成
     this.bind();
-  }
-
-  /**
-   * 初期準備
-   */
-  initialize() {
-    // スライダー初期位置に移動
-    this.goToFirstPosition();
   }
 
   /**
@@ -62,18 +52,6 @@ export default class {
     }
     $indicatorWrap.appendChild(dotFragment);
     return $indicatorWrap.querySelectorAll('li');
-  }
-
-  goToFirstPosition() {
-    const SLIDER_FIRST_POSITION = this.getSliderTranslateX(
-      this.currentSlideIndex,
-      this.slideWidth
-    );
-    velocity(
-      this.$sliderList,
-      { translateX: SLIDER_FIRST_POSITION },
-      { duration: 0 }
-    );
   }
 
   getSliderTranslateX(slideNumber, slideWidth) {
