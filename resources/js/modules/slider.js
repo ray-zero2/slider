@@ -111,48 +111,41 @@ export default class {
       this.$sliderList,
       { translateX: POSITION },
       {
-        duration: this.duration
+        duration: this.duration,
+        queue: 'goTo'
       }
     );
+
+    velocity.Utilities.dequeue(this.$sliderList, 'goTo');
   }
 
   next() {
     this.currentSlideNumber++;
+    if (this.currentSlideNumber > this.numberOfImages) {
+      this.currentSlideNumber = 1;
+      this.goTo({ translateX: 0 });
+    }
     this.xxx();
   }
 
   previous() {
     this.currentSlideNumber--;
-    this.xxx();
-  }
-
-  xxx() {
-    if (this.currentSlideNumber > this.numberOfImages) {
-      this.currentSlideNumber = 1;
-      this.goTo({ translateX: 0 });
-    } else if (this.currentSlideNumber < 1) {
+    if (this.currentSlideNumber < 1) {
       this.currentSlideNumber = this.numberOfImages;
       this.goTo({
         translateX: this.calcSliderPosition(this.currentSlideNumber + 1)
       });
-    } else {
-      this.changeActiveIndicator();
-      this.moveSlide();
     }
+    this.xxx();
+  }
+
+  xxx() {
+    this.changeActiveIndicator();
+    this.moveSlide();
   }
 
   goTo({ translateX }) {
-    velocity(
-      this.$sliderList,
-      { translateX },
-      {
-        duration: 0,
-        complete: () => {
-          this.changeActiveIndicator();
-          this.moveSlide();
-        }
-      }
-    );
+    velocity(this.$sliderList, { translateX }, { duration: 0, queue: 'goTo' });
   }
 
   trackingFinger() {
