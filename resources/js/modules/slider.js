@@ -127,7 +127,7 @@ export default class {
     this.currentSlideNumber++;
     if (this.currentSlideNumber > this.numberOfImages) {
       this.currentSlideNumber = 1;
-      this.goTo({ translateX: 0 });
+      this.jump({ translateX: 0 });
     }
     this.xxx();
   }
@@ -136,7 +136,7 @@ export default class {
     this.currentSlideNumber--;
     if (this.currentSlideNumber < 1) {
       this.currentSlideNumber = this.numberOfImages;
-      this.goTo({
+      this.jump({
         translateX: this.getSliderTranslateX(
           this.currentSlideNumber + 1,
           this.slideWidth
@@ -151,7 +151,7 @@ export default class {
     this.moveSlide();
   }
 
-  goTo({ translateX }) {
+  jump({ translateX }) {
     velocity(this.$sliderList, { translateX }, { duration: 0, queue: 'goTo' });
   }
 
