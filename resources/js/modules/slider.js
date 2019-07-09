@@ -6,7 +6,9 @@ export default class {
     this.$sliderList = document.querySelector('.slider_list');
     this.$image1 = document.querySelector('.slider_image1');
     this.$image5 = document.querySelector('.slider_image5');
-    this.$indicator = document.querySelector('.indicator');
+    this.$dotIndicators = this.createDotIndicators({
+      dotsToShow: this.$sliderList.childElementCount
+    });
 
     //指スワイプで反応するレート
     this.fps = 30;
@@ -29,7 +31,6 @@ export default class {
     this.frameTime = 1000 / this.fps;
     //初期化
     this.initialize();
-    this.$indicatorDots = this.$indicator.childNodes;
 
     //イベント生成
     this.bind();
@@ -41,9 +42,6 @@ export default class {
   initialize() {
     // 最初と最後の画像を複製してリストに追加
     this.cloneSlides();
-
-    // インジケータ作成
-    this.createIndicator();
 
     // スライダー初期位置に移動
     this.goToFirstPosition();
@@ -60,18 +58,21 @@ export default class {
   }
 
   /**
-   * インジケーターの要素を作成してDOMに追加する
-   * 一度フラグメントに入れてまとめてDOMへ。
+   * ドットのインジケータを生成する
+   * @param {number} dotsToShow 表示させるドットの数
+   * @returns {HTMLElement} 生成したドットのインジケータのDOm
    */
-  createIndicator() {
+  createDotIndicators({ dotsToShow }) {
+    const $indicatorWrap = document.querySelector('.indicator');
     let dotFragment = document.createDocumentFragment();
-    for (let i = 1; i <= this.numberOfImages; i++) {
+    for (let i = 1; i <= dotsToShow; i++) {
       let $item = document.createElement('li');
       $item.dataset.number = i;
       if (i === 1) $item.classList.add('current-image-dot');
       dotFragment.appendChild($item);
     }
-    this.$indicator.appendChild(dotFragment);
+    $indicatorWrap.appendChild(dotFragment);
+    return $indicatorWrap.childNodes;
   }
 
   goToFirstPosition() {
@@ -91,10 +92,10 @@ export default class {
    * インジケーターの表示切り替え
    */
   changeActiveIndicator() {
-    [...this.$indicatorDots][this.previousCounter].classList.remove(
+    [...this.$dotIndicators][this.previousCounter].classList.remove(
       'current-image-dot'
     );
-    [...this.$indicatorDots][this.sliderCounter].classList.add(
+    [...this.$dotIndicators][this.sliderCounter].classList.add(
       'current-image-dot'
     );
   }
@@ -201,7 +202,7 @@ export default class {
       });
     });
 
-    [...this.$indicatorDots].forEach($element => {
+    [...this.$dotIndicators].forEach($element => {
       $element.addEventListener('click', event => {
         const SELECT_NUMBER = event.target.dataset.number;
         this.previousCounter = this.sliderCounter;
