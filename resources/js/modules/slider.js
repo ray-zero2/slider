@@ -3,7 +3,7 @@ export default class {
   constructor() {
     this.$sliderButton = document.querySelectorAll('.slider_btn');
     this.$sliderWindow = document.querySelector('.slider_window');
-    this.$slider_list = document.querySelector('.slider_list');
+    this.$sliderList = document.querySelector('.slider_list');
     this.$image1 = document.querySelector('.slider_image1');
     this.$image5 = document.querySelector('.slider_image5');
     this.$indicator = document.querySelector('.indicator');
@@ -19,7 +19,7 @@ export default class {
     this.previousCounter = this.sliderCounter;
 
     //現在の画像枚数取得
-    this.numberOfImages = this.$slider_list.childElementCount;
+    this.numberOfImages = this.$sliderList.childElementCount;
     //タッチしたときの動きに関する部分
     this.isFinger = false;
     this.fingerPosition = {
@@ -70,7 +70,7 @@ export default class {
   moveSlide() {
     const POSITION = this.calcSliderPosition(this.sliderCounter);
     velocity(
-      this.$slider_list,
+      this.$sliderList,
       { translateX: POSITION },
       {
         duration: this.duration
@@ -83,7 +83,7 @@ export default class {
   jumpSlide(number) {
     const POSITION = this.calcSliderPosition(number);
     velocity(
-      this.$slider_list,
+      this.$sliderList,
       { translateX: POSITION },
       {
         duration: 0
@@ -98,7 +98,7 @@ export default class {
     if (this.sliderCounter > this.numberOfImages) {
       this.sliderCounter = 1;
       velocity(
-        this.$slider_list,
+        this.$sliderList,
         { translateX: 0 },
         {
           duration: 0,
@@ -120,7 +120,7 @@ export default class {
     if (this.sliderCounter < 1) {
       this.sliderCounter = this.numberOfImages;
       velocity(
-        this.$slider_list,
+        this.$sliderList,
         { translateX: this.calcSliderPosition(this.sliderCounter + 1) },
         {
           duration: 0,
@@ -147,7 +147,7 @@ export default class {
     this.moveTo =
       -(this.sliderCounter * this.sliderSize) + this.DISTANCE_VW + 'vw';
 
-    velocity(this.$slider_list, { translateX: this.moveTo }, { duration: 0 });
+    velocity(this.$sliderList, { translateX: this.moveTo }, { duration: 0 });
 
     setTimeout(() => {
       this.trackingFinger();
@@ -157,7 +157,7 @@ export default class {
   bind() {
     [...this.$sliderButton].forEach(element => {
       element.addEventListener('click', event => {
-        velocity(this.$slider_list, 'stop', true);
+        velocity(this.$sliderList, 'stop', true);
         if (element.dataset.order === 'after') {
           this.nextData();
         } else {
@@ -192,7 +192,7 @@ export default class {
     });
 
     this.$sliderWindow.addEventListener('touchend', () => {
-      velocity(this.$slider_list, 'stop', true);
+      velocity(this.$sliderList, 'stop', true);
       this.isFinger = false;
 
       //スライド移動実行
@@ -214,7 +214,7 @@ export default class {
         this.sliderCounter = 1;
         this.changeActiveIndicator();
         velocity(
-          this.$slider_list,
+          this.$sliderList,
           { translateX: this.calcSliderPosition(this.sliderCounter) },
           {
             duration: 0
@@ -235,7 +235,7 @@ export default class {
         this.sliderCounter = this.numberOfImages;
         this.changeActiveIndicator();
         velocity(
-          this.$slider_list,
+          this.$sliderList,
           { translateX: this.calcSliderPosition(this.sliderCounter) },
           {
             duration: 0
@@ -255,12 +255,12 @@ export default class {
    */
   initialize() {
     //最初と最後の画像を複製してリストに追加
-    const $FIRST_IMAGE = this.$slider_list.firstElementChild.cloneNode(true);
-    const $LAST_IMAGE = this.$slider_list.lastElementChild.cloneNode(true);
-    this.$slider_list.appendChild($FIRST_IMAGE);
-    this.$slider_list.insertBefore(
+    const $FIRST_IMAGE = this.$sliderList.firstElementChild.cloneNode(true);
+    const $LAST_IMAGE = this.$sliderList.lastElementChild.cloneNode(true);
+    this.$sliderList.appendChild($FIRST_IMAGE);
+    this.$sliderList.insertBefore(
       $LAST_IMAGE,
-      this.$slider_list.firstElementChild
+      this.$sliderList.firstElementChild
     );
 
     //インジケータ作成
@@ -269,7 +269,7 @@ export default class {
     //スライダー初期位置に移動
     const SLIDER_FIRST_POSITION = this.calcSliderPosition(this.sliderCounter);
     velocity(
-      this.$slider_list,
+      this.$sliderList,
       { translateX: SLIDER_FIRST_POSITION },
       { duration: 0 }
     );
