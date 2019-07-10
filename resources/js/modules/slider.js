@@ -1,3 +1,9 @@
+const SLIDE_TYPE = {
+  FROM_FIRST_TO_LAST: 'FROM_FIRST_TO_LAST',
+  FROM_LAST_TO_FIRST: 'FROM_LAST_TO_FIRST',
+  TO_LEFT_OR_RIGHT: 'TO_LEFT_OR_RIGHT'
+};
+
 export default class {
   constructor() {
     this.$slider = document.querySelector('.slider_wrapper');
@@ -16,6 +22,9 @@ export default class {
 
     // 表示しているスライドのインデックス
     this.currentSlideIndex = 0;
+
+    // 1つ前のスライドのインデックス
+    this.lastSlideIndex = this.currentSlideIndex;
 
     // スライドの数
     this.slideLength = this.$slides.length;
@@ -43,7 +52,7 @@ export default class {
   /**
    * ドットのインジケータを生成する
    * @param {number} dotLength 表示させるドットの数
-   * @returns {HTMLElement} 生成したドットのインジケータのDOm
+   * @returns {HTMLElement} 生成したドットのインジケータのDOM
    */
   createDotIndicators({ dotLength }) {
     let dotFragment = document.createDocumentFragment();
@@ -63,17 +72,18 @@ export default class {
   }
 
   next() {
-    this.currentSlideIndex++;
-    if (this.currentSlideIndex > this.maxIndex) {
-      this.currentSlideIndex = 0;
-      this.setMostLeftPosition(this.$slides[this.maxIndex]);
-      this.addSlideQueue(
-        {
-          translateX: this.getSliderTranslateX(-1, this.slideWidth)
-        },
-        { duration: 0 }
-      );
-    }
+    this.currentSlideIndex =
+      this.currentSlideIndex + 1 > this.maxIndex
+        ? 0
+        : this.currentSlideIndex + 1;
+    this.update();
+  }
+
+  previous() {
+    this.currentSlideIndex =
+      this.currentSlideIndex - 1 < 0
+        ? this.maxIndex
+        : this.currentSlideIndex - 1;
     this.update();
   }
 
@@ -82,24 +92,6 @@ export default class {
       this.maxIndex + 1,
       this.slideWidth
     )})`;
-  }
-
-  previous() {
-    this.currentSlideIndex--;
-    if (this.currentSlideIndex < 0) {
-      this.currentSlideIndex = this.maxIndex;
-      this.setMostRightPosition(this.$slides[0]);
-      this.addSlideQueue(
-        {
-          translateX: this.getSliderTranslateX(
-            this.currentSlideIndex + 1,
-            this.slideWidth
-          )
-        },
-        { duration: 0 }
-      );
-    }
-    this.update();
   }
 
   setMostRightPosition($element) {
@@ -111,7 +103,9 @@ export default class {
 
   update() {
     this.updateActiveIndicator();
+    this.readySlide();
     this.slide();
+    this.lastSlideIndex = this.currentSlideIndex;
   }
 
   updateActiveIndicator() {
@@ -123,9 +117,47 @@ export default class {
     });
   }
 
-  slide() {
-    velocity(
-      this.$sliderWrapper,
+  getTranslateXOfLastSlide() {
+    return this.getSliderTranslateX(this.maxIndex + 1, this.slideWidth);
+  }
+
+  getTranslateXOfFirstSlide() {
+    return this.getSliderTranslateX(-1, this.slideWidth);
+  }
+
+  readySlide() {
+    switch (this.getSlideType()) {
+      case SLIDE_TYPE.FROM_FIRST_TO_LAST:
+        this.addSlideQueue(
+          { translateX: this.getTranslateXOfLastSlide() },
+          {
+            duration: 0,
+            begin: () => {
+              this.setMostRightPosition(this.$slides[0]);
+            }
+          }
+        );
+        break;
+
+      case SLIDE_TYPE.FROM_LAST_TO_FIRST:
+        this.addSlideQueue(
+          { translateX: this.getTranslateXOfFirstSlide() },
+          {
+            duration: 0,
+            begin: () => {
+              this.setMostLeftPosition(this.$slides[this.maxIndex]);
+            }
+          }
+        );
+        break;
+
+      case SLIDE_TYPE.TO_LEFT_OR_RIGHT:
+        this.$slides[0].style.transform = '';
+        this.$slides[this.maxIndex].style.transform = '';
+        break;
+    }
+
+    this.addSlideQueue(
       {
         translateX: this.getSliderTranslateX(
           this.currentSlideIndex,
@@ -134,18 +166,35 @@ export default class {
       },
       {
         duration: this.duration,
-        queue: 'slide',
         complete: () => {
-          this.$slides[0].style.transform = 'initial';
-          this.$slides[this.maxIndex].style.transform = 'initial';
+          this.$slides[0].style.transform = '';
+          this.$slides[this.maxIndex].style.transform = '';
         }
       }
     );
+  }
 
+  getSlideType() {
+    const shouldSlideLastFromFirst =
+      this.lastSlideIndex === 0 && this.currentSlideIndex === this.maxIndex;
+    const shouldSlideFirstFromLast =
+      this.lastSlideIndex === this.maxIndex && this.currentSlideIndex === 0;
+
+    if (shouldSlideLastFromFirst) {
+      return SLIDE_TYPE.FROM_FIRST_TO_LAST;
+    } else if (shouldSlideFirstFromLast) {
+      return SLIDE_TYPE.FROM_LAST_TO_FIRST;
+    } else {
+      return SLIDE_TYPE.TO_LEFT_OR_RIGHT;
+    }
+  }
+
+  slide() {
     velocity.Utilities.dequeue(this.$sliderWrapper, 'slide');
   }
 
   addSlideQueue(properties, options) {
+    velocity(this.$sliderWrapper, 'stop', true);
     velocity(this.$sliderWrapper, properties, { ...options, queue: 'slide' });
   }
 
@@ -168,12 +217,10 @@ export default class {
   // }
 
   handlePreviousClick() {
-    velocity(this.$sliderWrapper, 'stop', true);
     this.previous();
   }
 
   handleNextClick() {
-    velocity(this.$sliderWrapper, 'stop', true);
     this.next();
   }
 
