@@ -6,7 +6,7 @@ export default class {
     this.$previousButton = this.$slider.querySelector('[data-order="before"]');
     this.$nextButton = this.$slider.querySelector('[data-order="after"]');
     this.$dotIndicators = this.createDotIndicators({
-      dotsToShow: this.$sliderWrapper.childElementCount
+      dotLength: this.$slides.length
     });
 
     // this.$sliderWindow = document.querySelector('.slider_window');
@@ -42,20 +42,20 @@ export default class {
 
   /**
    * ドットのインジケータを生成する
-   * @param {number} dotsToShow 表示させるドットの数
+   * @param {number} dotLength 表示させるドットの数
    * @returns {HTMLElement} 生成したドットのインジケータのDOm
    */
-  createDotIndicators({ dotsToShow }) {
-    const $indicatorWrap = document.querySelector('.indicator');
+  createDotIndicators({ dotLength }) {
     let dotFragment = document.createDocumentFragment();
-    for (let index = 0; index < dotsToShow; index++) {
+    for (let index = 0; index < dotLength; index++) {
       let $item = document.createElement('li');
       $item.dataset.index = index;
       if (index === 0) $item.classList.add('current-image-dot');
       dotFragment.appendChild($item);
     }
-    $indicatorWrap.appendChild(dotFragment);
-    return $indicatorWrap.querySelectorAll('li');
+    const $indicatorWrapper = document.querySelector('.indicator');
+    $indicatorWrapper.appendChild(dotFragment);
+    return $indicatorWrapper.querySelectorAll('li');
   }
 
   getSliderTranslateX(slideNumber, slideWidth) {
