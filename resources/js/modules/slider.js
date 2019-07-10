@@ -167,22 +167,29 @@ export default class {
   //   }, this.frameTime);
   // }
 
+  handlePreviousClick() {
+    velocity(this.$sliderWrapper, 'stop', true);
+    this.previous();
+  }
+
+  handleNextClick() {
+    velocity(this.$sliderWrapper, 'stop', true);
+    this.next();
+  }
+
+  handleDotClick(event) {
+    this.currentSlideIndex = Number(event.target.dataset.index);
+    this.update();
+  }
+
   bind() {
-    this.$previousButton.addEventListener('click', () => {
-      velocity(this.$sliderWrapper, 'stop', true);
-      this.previous();
-    });
-
-    this.$nextButton.addEventListener('click', () => {
-      velocity(this.$sliderWrapper, 'stop', true);
-      this.next();
-    });
-
+    this.$previousButton.addEventListener(
+      'click',
+      this.handlePreviousClick.bind(this)
+    );
+    this.$nextButton.addEventListener('click', this.handleNextClick.bind(this));
     [...this.$dotIndicators].forEach($element => {
-      $element.addEventListener('click', event => {
-        this.currentSlideIndex = Number(event.target.dataset.index);
-        this.update();
-      });
+      $element.addEventListener('click', this.handleDotClick.bind(this));
     });
 
     // this.$sliderWindow.addEventListener('touchstart', () => {
