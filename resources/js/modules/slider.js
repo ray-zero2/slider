@@ -1,13 +1,15 @@
 export default class {
   constructor() {
-    this.$previousButton = document.querySelector('[data-order="before"]');
-    this.$nextButton = document.querySelector('[data-order="after"]');
-    this.$sliderWindow = document.querySelector('.slider_window');
-    this.$sliderWrapper = document.querySelector('.slider_list');
+    this.$slider = document.querySelector('.slider_wrapper');
+    this.$sliderWrapper = this.$slider.querySelector('.slider_list');
     this.$slides = this.$sliderWrapper.querySelectorAll('.slider_items');
+    this.$previousButton = this.$slider.querySelector('[data-order="before"]');
+    this.$nextButton = this.$slider.querySelector('[data-order="after"]');
     this.$dotIndicators = this.createDotIndicators({
       dotsToShow: this.$sliderWrapper.childElementCount
     });
+
+    // this.$sliderWindow = document.querySelector('.slider_window');
 
     // スライドの幅[vw]
     this.slideWidth = 70;
