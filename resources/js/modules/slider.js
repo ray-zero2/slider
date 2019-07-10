@@ -5,8 +5,6 @@ export default class {
     this.$sliderWindow = document.querySelector('.slider_window');
     this.$sliderList = document.querySelector('.slider_list');
     this.$slides = this.$sliderList.querySelectorAll('.slider_items');
-    this.$image1 = document.querySelector('.slider_image1');
-    this.$image5 = document.querySelector('.slider_image5');
     this.$dotIndicators = this.createDotIndicators({
       dotsToShow: this.$sliderList.childElementCount
     });
