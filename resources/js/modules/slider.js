@@ -3,10 +3,10 @@ export default class {
     this.$previousButton = document.querySelector('[data-order="before"]');
     this.$nextButton = document.querySelector('[data-order="after"]');
     this.$sliderWindow = document.querySelector('.slider_window');
-    this.$sliderList = document.querySelector('.slider_list');
-    this.$slides = this.$sliderList.querySelectorAll('.slider_items');
+    this.$sliderWrapper = document.querySelector('.slider_list');
+    this.$slides = this.$sliderWrapper.querySelectorAll('.slider_items');
     this.$dotIndicators = this.createDotIndicators({
-      dotsToShow: this.$sliderList.childElementCount
+      dotsToShow: this.$sliderWrapper.childElementCount
     });
 
     // スライドの幅[vw]
@@ -123,7 +123,7 @@ export default class {
 
   slide() {
     velocity(
-      this.$sliderList,
+      this.$sliderWrapper,
       {
         translateX: this.getSliderTranslateX(
           this.currentSlideIndex,
@@ -140,11 +140,11 @@ export default class {
       }
     );
 
-    velocity.Utilities.dequeue(this.$sliderList, 'slide');
+    velocity.Utilities.dequeue(this.$sliderWrapper, 'slide');
   }
 
   addSlideQueue(properties, options) {
-    velocity(this.$sliderList, properties, { ...options, queue: 'slide' });
+    velocity(this.$sliderWrapper, properties, { ...options, queue: 'slide' });
   }
 
   // trackingFinger() {
@@ -158,7 +158,7 @@ export default class {
   //   this.moveTo =
   //     -(this.currentSlideIndex * this.slideWidth) + this.DISTANCE_VW + 'vw';
 
-  //   velocity(this.$sliderList, { translateX: this.moveTo }, { duration: 0 });
+  //   velocity(this.$sliderWrapper, { translateX: this.moveTo }, { duration: 0 });
 
   //   setTimeout(() => {
   //     this.trackingFinger();
@@ -167,12 +167,12 @@ export default class {
 
   bind() {
     this.$previousButton.addEventListener('click', () => {
-      velocity(this.$sliderList, 'stop', true);
+      velocity(this.$sliderWrapper, 'stop', true);
       this.previous();
     });
 
     this.$nextButton.addEventListener('click', () => {
-      velocity(this.$sliderList, 'stop', true);
+      velocity(this.$sliderWrapper, 'stop', true);
       this.next();
     });
 
@@ -199,7 +199,7 @@ export default class {
     // });
 
     // this.$sliderWindow.addEventListener('touchend', () => {
-    //   velocity(this.$sliderList, 'stop', true);
+    //   velocity(this.$sliderWrapper, 'stop', true);
     //   this.isFinger = false;
 
     //   // スライド移動実行
@@ -221,7 +221,7 @@ export default class {
   //       this.currentSlideIndex = 1;
   //       this.updateActiveIndicator();
   //       velocity(
-  //         this.$sliderList,
+  //         this.$sliderWrapper,
   //         {
   //           translateX: this.getSliderTranslateX(
   //             this.currentSlideIndex,
@@ -246,7 +246,7 @@ export default class {
   //       this.currentSlideIndex = this.slideLength;
   //       this.updateActiveIndicator();
   //       velocity(
-  //         this.$sliderList,
+  //         this.$sliderWrapper,
   //         {
   //           translateX: this.getSliderTranslateX(
   //             this.currentSlideIndex,
