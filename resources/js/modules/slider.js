@@ -11,25 +11,30 @@ export default class {
       dotsToShow: this.$sliderList.childElementCount
     });
 
-    // 指スワイプで反応するレート
-    this.fps = 30;
-    // スライダー画像サイズ[vw]
+    // スライドの幅[vw]
     this.slideWidth = 70;
-    // アニメーション動作時間[ms]
-    this.duration = 200;
-    // 表示しているスライダーのインデックス
+
+    // 表示しているスライドのインデックス
     this.currentSlideIndex = 0;
+
     // スライドの数
     this.slideLength = this.$slides.length;
-    // 最大のインデックス
+
+    // スライドの最大インデックス
     this.maxIndex = this.slideLength - 1;
+
+    // アニメーション動作時間[ms]
+    this.duration = 200;
+
     // タッチしたときの動きに関する部分
-    this.isFinger = false;
-    this.fingerPosition = {
-      previous: 0,
-      current: 0
-    };
-    this.frameTime = 1000 / this.fps;
+    // 指スワイプで反応するレート
+    // this.fps = 30;
+    // this.isFinger = false;
+    // this.fingerPosition = {
+    //   previous: 0,
+    //   current: 0
+    // };
+    // this.frameTime = 1000 / this.fps;
 
     //イベント生成
     this.bind();
