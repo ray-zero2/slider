@@ -1,4 +1,3 @@
-// import velocity from 'velocity-animate';
 export default class {
   constructor() {
     this.$previousButton = document.querySelector('[data-order="before"]');
