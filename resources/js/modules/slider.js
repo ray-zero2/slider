@@ -7,15 +7,14 @@ const SLIDE_TYPE = {
 export default class {
   constructor() {
     this.$slider = document.querySelector('.slider_wrapper');
-    this.$sliderWrapper = this.$slider.querySelector('.slider_list');
-    this.$slides = this.$sliderWrapper.querySelectorAll('.slider_items');
+    this.$sliderWrapper = this.$slider.querySelector('.slider_window');
+    this.$sliderList = this.$slider.querySelector('.slider_list');
+    this.$slides = this.$sliderList.querySelectorAll('.slider_items');
     this.$previousButton = this.$slider.querySelector('[data-order="before"]');
     this.$nextButton = this.$slider.querySelector('[data-order="after"]');
     this.$dotIndicators = this.createDotIndicators({
       dotLength: this.$slides.length
     });
-
-    // this.$sliderWindow = document.querySelector('.slider_window');
 
     // スライドの幅[vw]
     this.slideWidth = 70;
@@ -35,15 +34,14 @@ export default class {
     // アニメーション動作時間[ms]
     this.duration = 200;
 
-    // タッチしたときの動きに関する部分
-    // 指スワイプで反応するレート
-    // this.fps = 30;
-    // this.isFinger = false;
-    // this.fingerPosition = {
-    //   previous: 0,
-    //   current: 0
-    // };
-    // this.frameTime = 1000 / this.fps;
+    this.isTouching = false;
+    this.fingerPosition = {
+      previous: 0,
+      current: 0
+    };
+    // スワイプで反応するフレームレート
+    const fps = 30;
+    this.frameTime = 1000 / fps;
 
     //イベント生成
     this.bind();
@@ -190,31 +188,31 @@ export default class {
   }
 
   slide() {
-    velocity.Utilities.dequeue(this.$sliderWrapper, 'slide');
+    velocity.Utilities.dequeue(this.$sliderList, 'slide');
   }
 
   addSlideQueue(properties, options) {
-    velocity(this.$sliderWrapper, 'stop', true);
-    velocity(this.$sliderWrapper, properties, { ...options, queue: 'slide' });
+    velocity(this.$sliderList, 'stop', true);
+    velocity(this.$sliderList, properties, { ...options, queue: 'slide' });
   }
 
-  // trackingFinger() {
-  //   if (!this.isFinger) return;
+  trackingFinger() {
+    if (!this.isTouching) return;
 
-  //   // スワイプ距離計算[px]
-  //   const DISTANCE = this.fingerPosition.current - this.fingerPosition.previous;
-  //   // スワイプ距離変換[vw]
-  //   this.DISTANCE_VW = (DISTANCE * 100) / window.innerWidth;
-  //   // 移動量計算
-  //   this.moveTo =
-  //     -(this.currentSlideIndex * this.slideWidth) + this.DISTANCE_VW + 'vw';
+    // スワイプ距離計算[px]
+    const DISTANCE = this.fingerPosition.current - this.fingerPosition.previous;
+    // スワイプ距離変換[vw]
+    this.DISTANCE_VW = (DISTANCE * 100) / window.innerWidth;
+    // 移動量計算
+    this.moveTo =
+      -(this.currentSlideIndex * this.slideWidth) + this.DISTANCE_VW + 'vw';
 
-  //   velocity(this.$sliderWrapper, { translateX: this.moveTo }, { duration: 0 });
+    velocity(this.$sliderList, { translateX: this.moveTo }, { duration: 0 });
 
-  //   setTimeout(() => {
-  //     this.trackingFinger();
-  //   }, this.frameTime);
-  // }
+    setTimeout(() => {
+      this.trackingFinger();
+    }, this.frameTime);
+  }
 
   handlePreviousClick() {
     this.previous();
@@ -229,6 +227,30 @@ export default class {
     this.update();
   }
 
+  handleTouchStart(event) {
+    const startX = event.changedTouches[0].pageX;
+    this.fingerPosition.previous = startX;
+    this.fingerPosition.current = startX;
+    // 指に追従させる
+    this.isTouching = true;
+    this.trackingFinger();
+  }
+
+  handleTouchMove(event) {
+    const currentX = event.changedTouches[0].pageX;
+    this.fingerPosition.current = currentX;
+  }
+
+  handleTouchEnd() {
+    velocity(this.$sliderList, 'stop', true);
+    this.isTouching = false;
+
+    // スライド移動実行
+    this.render();
+    this.fingerPosition.previous = 0;
+    this.fingerPosition.current = 0;
+  }
+
   bind() {
     this.$previousButton.addEventListener(
       'click',
@@ -239,87 +261,77 @@ export default class {
       $element.addEventListener('click', this.handleDotClick.bind(this));
     });
 
-    // this.$sliderWindow.addEventListener('touchstart', () => {
-    //   const TOUCH_OBJECT = event.changedTouches[0];
-    //   this.fingerPosition.previous = TOUCH_OBJECT.pageX;
-    //   this.fingerPosition.current = TOUCH_OBJECT.pageX;
-    //   // 指に追従させる
-    //   this.isFinger = true;
-    //   this.trackingFinger();
-    // });
+    this.$sliderWrapper.addEventListener(
+      'touchstart',
+      this.handleTouchStart.bind(this)
+    );
 
-    // this.$sliderWindow.addEventListener('touchmove', () => {
-    //   // 座標更新
-    //   const TOUCH_OBJECT = event.changedTouches[0];
-    //   this.fingerPosition.current = TOUCH_OBJECT.pageX;
-    // });
+    this.$sliderWrapper.addEventListener(
+      'touchmove',
+      this.handleTouchMove.bind(this)
+    );
 
-    // this.$sliderWindow.addEventListener('touchend', () => {
-    //   velocity(this.$sliderWrapper, 'stop', true);
-    //   this.isFinger = false;
-
-    //   // スライド移動実行
-    //   this.render();
-    //   this.fingerPosition.previous = 0;
-    //   this.fingerPosition.current = 0;
-    // });
+    this.$sliderWrapper.addEventListener(
+      'touchend',
+      this.handleTouchEnd.bind(this)
+    );
   }
 
-  // render() {
-  //   // スワイプ距離が半分超えたら次のスライドへ
-  //   if (this.DISTANCE_VW < -(this.slideWidth / 2)) {
-  //     // 最後のスライドから最初へ飛ぶ場合
-  //     if (this.currentSlideIndex === this.slideLength) {
-  //       // 最後の位置に複製した画像１へ送る
-  //       this.currentSlideIndex++;
-  //       this.slide();
-  //       // 最後の場所から本来の1番目の場所へジャンプ
-  //       this.currentSlideIndex = 1;
-  //       this.updateActiveIndicator();
-  //       velocity(
-  //         this.$sliderWrapper,
-  //         {
-  //           translateX: this.getSliderTranslateX(
-  //             this.currentSlideIndex,
-  //             this.slideWidth
-  //           )
-  //         },
-  //         {
-  //           duration: 0
-  //         }
-  //       );
-  //       // 通常通りの移動
-  //     } else {
-  //       this.next();
-  //     }
-  //   } else if (this.DISTANCE_VW > this.slideWidth / 2) {
-  //     // 最初のスライドから最後へ飛ぶ場合
-  //     if (this.currentSlideIndex === 1) {
-  //       //最初の位置に複製した最終画像へ送る
-  //       this.currentSlideIndex--;
-  //       this.slide();
-  //       // 本来の場所へジャンプ
-  //       this.currentSlideIndex = this.slideLength;
-  //       this.updateActiveIndicator();
-  //       velocity(
-  //         this.$sliderWrapper,
-  //         {
-  //           translateX: this.getSliderTranslateX(
-  //             this.currentSlideIndex,
-  //             this.slideWidth
-  //           )
-  //         },
-  //         {
-  //           duration: 0
-  //         }
-  //       );
-  //       // 通常通りの移動
-  //     } else {
-  //       this.previous();
-  //     }
-  //   } else {
-  //     // 画像移動ない場合は元に戻す
-  //     this.slide();
-  //   }
-  // }
+  render() {
+    // スワイプ距離が半分超えたら次のスライドへ
+    if (this.DISTANCE_VW < -(this.slideWidth / 2)) {
+      // 最後のスライドから最初へ飛ぶ場合
+      if (this.currentSlideIndex === this.slideLength) {
+        // 最後の位置に複製した画像１へ送る
+        this.currentSlideIndex++;
+        this.slide();
+        // 最後の場所から本来の1番目の場所へジャンプ
+        this.currentSlideIndex = 1;
+        this.updateActiveIndicator();
+        velocity(
+          this.$sliderList,
+          {
+            translateX: this.getSliderTranslateX(
+              this.currentSlideIndex,
+              this.slideWidth
+            )
+          },
+          {
+            duration: 0
+          }
+        );
+        // 通常通りの移動
+      } else {
+        this.next();
+      }
+    } else if (this.DISTANCE_VW > this.slideWidth / 2) {
+      // 最初のスライドから最後へ飛ぶ場合
+      if (this.currentSlideIndex === 1) {
+        //最初の位置に複製した最終画像へ送る
+        this.currentSlideIndex--;
+        this.slide();
+        // 本来の場所へジャンプ
+        this.currentSlideIndex = this.slideLength;
+        this.updateActiveIndicator();
+        velocity(
+          this.$sliderList,
+          {
+            translateX: this.getSliderTranslateX(
+              this.currentSlideIndex,
+              this.slideWidth
+            )
+          },
+          {
+            duration: 0
+          }
+        );
+        // 通常通りの移動
+      } else {
+        this.previous();
+      }
+    } else {
+      // 画像移動ない場合は元に戻す
+      this.slide();
+    }
+  }
 }
