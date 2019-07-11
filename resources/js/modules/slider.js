@@ -4,6 +4,14 @@ const SLIDE_TYPE = {
   TO_LEFT_OR_RIGHT: 'TO_LEFT_OR_RIGHT'
 };
 
+const outerWidth = el => {
+  let width = el.offsetWidth;
+  const style = getComputedStyle(el);
+
+  width += parseInt(style.marginLeft) + parseInt(style.marginRight);
+  return width;
+};
+
 export default class {
   constructor() {
     this.$slider = document.querySelector('.slider_wrapper');
@@ -16,8 +24,8 @@ export default class {
       dotLength: this.$slides.length
     });
 
-    // スライドの幅[vw]
-    this.slideWidth = 70;
+    // スライドの幅[width]
+    this.slideWidth = outerWidth(this.$slides[0]);
 
     // 表示しているスライドのインデックス
     this.currentSlideIndex = 0;
@@ -65,8 +73,8 @@ export default class {
     return $indicatorWrapper.querySelectorAll('li');
   }
 
-  getSliderTranslateX(slideNumber, slideWidth) {
-    return -(slideNumber * slideWidth) + 'vw';
+  getSliderTranslateX(slideIndex, slideWidth) {
+    return -(slideIndex * slideWidth) + 'px';
   }
 
   next() {
