@@ -57,8 +57,18 @@ export default class {
     this.bind();
   }
 
+  // クローンしたスライド以外の先頭のスライドのインデックス
+  indexOfFirstSlide() {
+    return 1;
+  }
+
+  // クローンしたスライド以外の末尾のスライドのインデックス
+  indexOfLastSlide() {
+    return this.maxIndex - 1;
+  }
+
   /**
-   * 無限ループを実現するためにスライドを最初と最後のスライドをクローンする
+   * 無限ループを実現するため先頭と末尾のスライドをクローンする
    */
   cloneSlide() {
     this.$sliderList.appendChild(this.$slides[0].cloneNode(true));
@@ -92,12 +102,8 @@ export default class {
    * イベントハンドラをバインドする
    */
   bind() {
-    this.$previousButton.addEventListener(
-      'click',
-      this.handlePreviousClick.bind(this)
-    );
-
-    this.$nextButton.addEventListener('click', this.handleNextClick.bind(this));
+    this.$previousButton.addEventListener('click', this.previous.bind(this));
+    this.$nextButton.addEventListener('click', this.next.bind(this));
 
     [...this.$dotIndicators].forEach($element => {
       $element.addEventListener('click', this.handleDotClick.bind(this));
@@ -154,6 +160,28 @@ export default class {
     });
   }
 
+  async slide(newSlideIndex) {
+    const slideType = this.getSlideType(newSlideIndex);
+    if (slideType === SLIDE_TYPE.TO_LAST_FROM_FIRST)
+      await this.jump(this.indexOfLastSlide());
+    if (slideType === SLIDE_TYPE.TO_FIRST_FROM_LAST)
+      await this.jump(this.indexOfFirstSlide());
+
+    velocity(
+      this.$sliderList,
+      { translateX: this.currentTranslateX },
+      { duration: 250, queue: false }
+    );
+  }
+
+  /**
+   * スライドアニメーションの処理を分岐するためのスライドのタイプを取得する
+   * @param {number} newSlideIndex 更新されたスライドのインデックス
+   * @returns {string} スライドのタイプ
+   *                   SLIDE_TYPE.TO_LAST_FROM_FIRST : 先頭から末尾にスライド
+   *                   SLIDE_TYPE.TO_FIRST_FROM_LAST : 末尾から先頭にスライド
+   *                   SLIDE_TYPE.TO_LEFT_OR_RIGHT   : 左右にスライド
+   */
   getSlideType(newSlideIndex) {
     const shouldGoToLastFromFirst =
       this.lastSlideIndex === 0 &&
@@ -166,13 +194,9 @@ export default class {
 
     if (shouldGoToLastFromFirst) {
       return SLIDE_TYPE.TO_LAST_FROM_FIRST;
-    }
-
-    if (shouldGoToFirstFromLast) {
+    } else if (shouldGoToFirstFromLast) {
       return SLIDE_TYPE.TO_FIRST_FROM_LAST;
-    }
-
-    if (!shouldGoToLastFromFirst && !shouldGoToFirstFromLast) {
+    } else {
       return SLIDE_TYPE.TO_LEFT_OR_RIGHT;
     }
   }
@@ -185,42 +209,6 @@ export default class {
     );
   }
 
-  jumpFirst() {
-    return velocity(
-      this.$sliderList,
-      { translateX: -this.slideWidth },
-      { duration: 0, queue: false }
-    );
-  }
-
-  jumpLast() {
-    return velocity(
-      this.$sliderList,
-      { translateX: -(this.slideWidth * (this.maxIndex - 1)) },
-      { duration: 0, queue: false }
-    );
-  }
-
-  async slide(newSlideIndex) {
-    const slideType = this.getSlideType(newSlideIndex);
-    if (slideType === SLIDE_TYPE.TO_LAST_FROM_FIRST) await this.jumpLast();
-    if (slideType === SLIDE_TYPE.TO_FIRST_FROM_LAST) await this.jumpFirst();
-
-    velocity(
-      this.$sliderList,
-      { translateX: this.currentTranslateX },
-      { duration: 250, queue: false }
-    );
-  }
-
-  handlePreviousClick() {
-    this.previous();
-  }
-
-  handleNextClick() {
-    this.next();
-  }
-
   handleDotClick(event) {
     this.currentSlideIndex = Number(event.target.dataset.index);
     this.update(this.currentSlideIndex);
@@ -228,6 +216,7 @@ export default class {
 
   handleTouchStart(event) {
     this.touching = true;
+
     const startX = event.changedTouches[0].pageX;
     this.touches.startX = startX;
     this.touches.currentX = startX;
@@ -239,23 +228,25 @@ export default class {
     const currentX = event.changedTouches[0].pageX;
     this.touches.currentX = currentX;
     this.diffX = this.touches.currentX - this.touches.startX;
+
+    // タッチ中のスライドのポジション
     const translateXWhenTouching = this.currentTranslateX + this.diffX;
 
-    // 最初のスライドから最後のスライドにジャンプする
+    // 先頭にクローンしたスライドからクローン元のスライドにジャンプする
     if (translateXWhenTouching > 0) {
       this.jumpedWhenTouching = true;
-      this.currentTranslateX = -(this.slideWidth * (this.maxIndex - 1));
-      this.currentSlideIndex = this.maxIndex - 1;
+      this.currentTranslateX = -(this.slideWidth * this.indexOfLastSlide());
+      this.currentSlideIndex = this.indexOfLastSlide();
       this.touches.startX = currentX;
       await this.jump(this.currentSlideIndex);
       return;
     }
 
-    // 最後のスライドから最初のスライドにジャンプする
+    // 末尾にクローンしたスライドからクローン元のスライドにジャンプする
     if (translateXWhenTouching < -(this.slideWidth * this.maxIndex)) {
       this.jumpedWhenTouching = true;
       this.currentTranslateX = -this.slideWidth;
-      this.currentSlideIndex = 1;
+      this.currentSlideIndex = this.indexOfFirstSlide();
       this.touches.startX = currentX;
       await this.jump(this.currentSlideIndex);
       return;
