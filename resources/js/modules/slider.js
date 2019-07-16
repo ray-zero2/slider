@@ -138,7 +138,6 @@ export default class {
   }
 
   update(newSlideIndex) {
-    this.currentTranslateX = -(newSlideIndex * this.slideWidth);
     this.updateActiveIndicator(newSlideIndex);
     this.slide(newSlideIndex);
     this.lastSlideIndex = newSlideIndex;
@@ -167,6 +166,7 @@ export default class {
     if (slideType === SLIDE_TYPE.TO_FIRST_FROM_LAST)
       await this.jump(this.indexOfFirstSlide());
 
+    this.currentTranslateX = -(newSlideIndex * this.slideWidth);
     velocity(
       this.$sliderList,
       { translateX: this.currentTranslateX },
