@@ -102,6 +102,8 @@ export default class {
    * イベントハンドラをバインドする
    */
   bind() {
+    window.addEventListener('resize', this.adjust.bind(this));
+
     this.$previousButton.addEventListener('click', this.previous.bind(this));
     this.$nextButton.addEventListener('click', this.next.bind(this));
 
@@ -125,6 +127,11 @@ export default class {
     );
   }
 
+  adjust() {
+    this.slideWidth = outerWidth(this.$slides[0]);
+    this.jump(this.currentSlideIndex);
+  }
+
   next() {
     const newIndex = this.currentSlideIndex + 1;
     this.currentSlideIndex = newIndex > this.maxIndex ? 2 : newIndex;
@@ -135,6 +142,10 @@ export default class {
     const newIndex = this.currentSlideIndex - 1;
     this.currentSlideIndex = newIndex < 0 ? this.maxIndex - 2 : newIndex;
     this.update(this.currentSlideIndex);
+  }
+
+  stop() {
+    velocity(this.$sliderList, 'stop', true);
   }
 
   update(newSlideIndex) {
@@ -215,7 +226,11 @@ export default class {
   }
 
   handleTouchStart(event) {
+    this.stop();
     this.touching = true;
+    this.currentTranslateX = Number(
+      velocity.hook(this.$sliderList, 'translateX').replace('px', '')
+    );
 
     const startX = event.changedTouches[0].pageX;
     this.touches.startX = startX;
@@ -260,7 +275,7 @@ export default class {
   }
 
   handleTouchEnd() {
-    velocity(this.$sliderList, 'stop', true);
+    this.stop();
 
     const threshold = 30;
     if (this.diffX < -threshold) {
@@ -271,6 +286,7 @@ export default class {
       this.update(this.currentSlideIndex);
     }
 
+    this.diffX = 0;
     this.touches.startX = 0;
     this.touches.currentX = 0;
     this.touching = false;
